@@ -5,22 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CocktailMan</title>
 </head>
-<body style="background: #000;">
-    <h2 style="color:Violet;">CocktailMan</h2><p>
-    <h4 style="color:Violet;">Upload an image and click submit</h4>
+<body style="background: #171717;">
+    <h2 style="color:#a87400;">CocktailMan</h2><p>
+    <h4 style="color:#c78550;">Upload an image and click submit</h4>
 
     <form method="post" action="/" enctype="multipart/form-data">
     <dl>
-	<p style="color:Violet;">
+	<p style="color:#c78550;">
 		<input type="file" name="file" autocomplete="off" required>
 	</p>
     </dl>
-    <p style="color:Violet;">
+    <p style="color:#c78550;">
 	<input type="submit" name="submit" value="Submit">
     </p>
     </form>
 
-    <h4 style="color:Violet;">Or upload image from URL</h4>
+    <h4 style="color:#c78550;">Or upload image from URL</h4>
     <form action="/" method="POST">
         <label>
             <input type="text" name="image_url" placeholder = "Enter image URL">
@@ -28,14 +28,14 @@
         <input type="submit" value="Load from URL">
     </form>
 
-    <h4 style="color:Violet;">
+    <h4 style="color:#c78550;">
         {{ name }}
     </h4>
 
-    <p style="color:MediumSeaGreen;">
+    <p style="color:#e09b1a;">
 	{% with messages = get_flashed_messages() %}
 	  {% if messages %}
-        Diagnosis for the following image is: <u><h3 style="color:MediumSeaGreen;">{{ messages[0] }}</h3></u><br>
+        Ingredients: <u><h3 style="color:#e09b1a;">{{ messages[0] }}</h3></u><br>
         <div style="width: 600px;">
             <img src="{{ messages[1] }}" width=auto height=auto style="max-width:300px;max-height:500px">
         </div>

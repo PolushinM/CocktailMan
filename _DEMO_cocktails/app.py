@@ -22,6 +22,14 @@ def submit_file():
     file_exist = "file" in request.files
     url_exist = "image_url" in request.form
 
+    for filename in os.listdir(UPLOAD_FOLDER):
+        file_path = os.path.join(UPLOAD_FOLDER, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+        except:
+            pass
+
     if request.method == 'POST':
         if not file_exist and not url_exist:
             flash('No file part')
@@ -32,10 +40,13 @@ def submit_file():
             image_url = request.form["image_url"]
             filename = 'url_image.tmp'
             full_filename = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            wget.download(image_url, full_filename)
-            label = getPrediction(full_filename)
-            flash(label)
-            flash(full_filename)
+            try:
+                wget.download(image_url, full_filename)
+                label = getPrediction(full_filename)
+                flash(label)
+                flash(full_filename)
+            except:
+                flash("Sorry, unable to read image.")
             return redirect('/')
         if file.filename == '' and "image_url" not in request.form:
             flash('No file selected for uploading')

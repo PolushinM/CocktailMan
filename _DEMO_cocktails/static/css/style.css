@@ -1,0 +1,28 @@
+body {
+  padding: 5px 30px;
+  max-width : 500px;
+  min-width : 300px;
+  margin: 0px auto;
+}
+
+.theme-dropdown .dropdown-menu {
+  position: static;
+  display: block;
+  margin-bottom: 20px;
+}
+
+.theme-showcase > p > .btn {
+  margin: 5px 0;
+}
+
+.theme-showcase .navbar .container {
+  width: auto;
+}
+
+#browsebutton {
+  background-color: white;
+}
+
+#my-file-selector {
+    display: none;
+}

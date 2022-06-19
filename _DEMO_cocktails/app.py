@@ -1,65 +1,64 @@
+
+import os
+
+import wget
 from flask import Flask, render_template, request, redirect, flash
 from werkzeug.utils import secure_filename
-from main import getPrediction
-import os
-import wget
 
-UPLOAD_FOLDER = 'static/images/'
+from main import getPrediction
+
+from flask_bootstrap import Bootstrap
+from forms import UploadForm
+
+UPLOAD_FOLDER = 'static/'
 
 app = Flask(__name__, static_folder="static")
+bootstrap = Bootstrap(app)
 
-app.secret_key = "secret key"
+
+app.secret_key = "546421349874624"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template('index.html')
-
-
-@app.route('/', methods=['POST'])
-def submit_file():
-    file_exist = "file" in request.files
-    url_exist = "image_url" in request.form
-
-    for filename in os.listdir(UPLOAD_FOLDER):
-        file_path = os.path.join(UPLOAD_FOLDER, filename)
-        try:
-            if os.path.isfile(file_path) or os.path.islink(file_path):
-                os.unlink(file_path)
-        except:
-            pass
+    form = UploadForm()
+    recipe = ''
+    file_exist = form.validate_on_submit()
+    url_exist = "image_url" in request.form and len(request.form["image_url"]) > 0
 
     if request.method == 'POST':
+        file = None
         if not file_exist and not url_exist:
-            flash('No file part')
-            return redirect(request.url)
+            os.popen('cp static/placeholder.jpg static/download.jpg')
+            flash('Файл отсутствует')
+            return redirect('/')
         if file_exist:
-            file = request.files['file']
+            file = request.files['input_file']
+            filename = secure_filename(file.filename)  # Use this werkzeug method to secure filename.
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], 'download.jpg'))
+            full_filename = os.path.join(app.config['UPLOAD_FOLDER'], 'download.jpg')
+            try:
+                recipe = getPrediction(full_filename)
+            except:
+                flash("Не могу прочитать изображение")
+                return redirect('/')
+            return render_template('index.html', form=form, recipe=recipe)
         if url_exist:
             image_url = request.form["image_url"]
-            filename = 'url_image.tmp'
-            full_filename = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            full_filename = os.path.join(app.config['UPLOAD_FOLDER'], 'download.jpg')
             try:
+                if os.path.exists(full_filename):
+                    os.remove(full_filename)
                 wget.download(image_url, full_filename)
-                label = getPrediction(full_filename)
-                flash(label)
-                flash(full_filename)
+                recipe = getPrediction(full_filename)
             except:
-                flash("Sorry, unable to read image.")
-            return redirect('/')
-        if file.filename == '' and "image_url" not in request.form:
-            flash('No file selected for uploading')
-            return redirect(request.url)
-        if file:
-            filename = secure_filename(file.filename)  # Use this werkzeug method to secure filename.
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            # getPrediction(filename)
-            full_filename = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            label = getPrediction(full_filename)
-            flash(label)
-            flash(full_filename)
-            return redirect('/')
+                os.popen('cp static/placeholder.jpg static/download.jpg')
+                flash("Не могу прочитать изображение")
+            return render_template('index.html', form=form, recipe=recipe)
+    else:
+        os.popen('cp static/placeholder.jpg static/download.jpg')
+        return render_template('index.html', form=form)
 
 
 if __name__ == "__main__":

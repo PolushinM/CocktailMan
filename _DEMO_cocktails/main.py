@@ -65,5 +65,5 @@ def generate_recipe(ingredients: list) -> str:
 
 
 def getPrediction(img_path: str) -> str:
-    ingredients = predict_ingredients(path=img_path, model=compiled_model_onnx, classes=class_labels_ru, threshold=0.25)
+    ingredients = predict_ingredients(path=img_path, model=compiled_model_onnx, classes=class_labels_ru, threshold=0.2)
     return generate_recipe(ingredients)

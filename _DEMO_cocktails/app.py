@@ -8,12 +8,11 @@ from main import getPrediction, ingredients_text
 from flask_bootstrap import Bootstrap
 from forms import UploadForm
 
-UPLOAD_FOLDER = 'static/images/'
 
 app = Flask(__name__, static_folder="static")
 bootstrap = Bootstrap(app)
 
-
+UPLOAD_FOLDER = 'static/images/'
 app.secret_key = "546421349874624"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -64,6 +63,7 @@ def replace_image():
 
 def render_index(form, recipe):
     return render_template('index.html', form=form, recipe=recipe, ingr_text=ingredients_text)
+
 
 if __name__ == "__main__":
     app.run(debug=True)

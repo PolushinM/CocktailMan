@@ -1,16 +1,14 @@
-
 import os
 
 import wget
 from flask import Flask, render_template, request, redirect, flash
-from werkzeug.utils import secure_filename
 
-from main import getPrediction
+from main import getPrediction, ingredients_text
 
 from flask_bootstrap import Bootstrap
 from forms import UploadForm
 
-UPLOAD_FOLDER = 'static/'
+UPLOAD_FOLDER = 'static/images/'
 
 app = Flask(__name__, static_folder="static")
 bootstrap = Bootstrap(app)
@@ -22,20 +20,19 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    form = UploadForm()
     recipe = ''
+    form = UploadForm()
     file_exist = form.validate_on_submit()
     url_exist = "image_url" in request.form and len(request.form["image_url"]) > 0
 
     if request.method == 'POST':
         file = None
         if not file_exist and not url_exist:
-            os.popen('cp static/placeholder.jpg static/download.jpg')
+            replace_image()
             flash('Файл отсутствует')
             return redirect('/')
         if file_exist:
             file = request.files['input_file']
-            filename = secure_filename(file.filename)  # Use this werkzeug method to secure filename.
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], 'download.jpg'))
             full_filename = os.path.join(app.config['UPLOAD_FOLDER'], 'download.jpg')
             try:
@@ -43,7 +40,7 @@ def index():
             except:
                 flash("Не могу прочитать изображение")
                 return redirect('/')
-            return render_template('index.html', form=form, recipe=recipe)
+            return render_index(form, recipe)
         if url_exist:
             image_url = request.form["image_url"]
             full_filename = os.path.join(app.config['UPLOAD_FOLDER'], 'download.jpg')
@@ -53,13 +50,20 @@ def index():
                 wget.download(image_url, full_filename)
                 recipe = getPrediction(full_filename)
             except:
-                os.popen('cp static/placeholder.jpg static/download.jpg')
+                replace_image()
                 flash("Не могу прочитать изображение")
-            return render_template('index.html', form=form, recipe=recipe)
+            return render_index(form, recipe)
     else:
-        os.popen('cp static/placeholder.jpg static/download.jpg')
-        return render_template('index.html', form=form)
+        replace_image()
+        return render_index(form, recipe)
 
+
+def replace_image():
+    os.popen(f'cp {UPLOAD_FOLDER}placeholder.jpg {UPLOAD_FOLDER}download.jpg')
+
+
+def render_index(form, recipe):
+    return render_template('index.html', form=form, recipe=recipe, ingr_text=ingredients_text)
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -38,18 +38,18 @@
             <input type="url" id="input_url" name="image_url" class="form-control" placeholder="Ссылка на изображение" style="min-width:67%">
           {{ form.submit(class_="btn btn-primary") }}
       </form>
-    </div> <!-- /container -->
+    </div>
 
     <div class="page-header">
       <h4>{{ recipe }}</h4>
-      <img src="{{url_for('static', filename = 'download.jpg')}}" class="img-thumbnail" alt="Твой коктейль" width=auto height=auto style="max-height:500px; max-width:100%">
+      <img src="{{url_for('static', filename = 'images/download.jpg')}}" class="img-thumbnail" alt="Твой коктейль не загрузился" width=auto height=auto style="max-height:500px; max-width:100%">
     </div>
   </div>
 
     <div class="text-left">
             <a onclick="show()" id="btnID" style="color:#2a6181; text-decoration: underline" >Доступные ингредиенты</a>
         <div id="ingredients" style="display:none">
-            <embed id="ingred_embed" src="{{url_for('static', filename = 'ingredients.txt')}}"  height="750">
+            <div class="text-left; multiline">{{ ingr_text }}</div>
         </div>
     </div>
 
@@ -60,6 +60,8 @@
         </svg>
         <a href="https://github.com/PolushinM/CocktailMan" style="color:#2a6181">github.com/PolushinM/CocktailMan</a>
     </div>
+
+
 
     <script>
         function show() {

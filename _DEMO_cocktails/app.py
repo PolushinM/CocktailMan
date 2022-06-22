@@ -1,69 +1,67 @@
-import os
-
-import wget
 from flask import Flask, render_template, request, redirect, flash
-
-from main import getPrediction, ingredients_text
-
 from flask_bootstrap import Bootstrap
 from forms import UploadForm
 
+from main import get_prediction_file, ingredients_text, replace_image, calibrate_confidence, get_prediction_url
+from app_config import config
 
-app = Flask(__name__, static_folder="static")
-bootstrap = Bootstrap(app)
 
-UPLOAD_FOLDER = 'static/images/'
-app.secret_key = "546421349874624"
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+# Run flask app with Bootstrap extension
+app = Flask(__name__, static_folder=config['static_folder'])
+Bootstrap(app)
+app.secret_key = config['secret_key']
 
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     recipe = ''
+    confidence = 0.
+
     form = UploadForm()
     file_exist = form.validate_on_submit()
     url_exist = "image_url" in request.form and len(request.form["image_url"]) > 0
 
     if request.method == 'POST':
-        file = None
         if not file_exist and not url_exist:
             replace_image()
             flash('Файл отсутствует')
             return redirect('/')
         if file_exist:
-            file = request.files['input_file']
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], 'download.jpg'))
-            full_filename = os.path.join(app.config['UPLOAD_FOLDER'], 'download.jpg')
             try:
-                recipe = getPrediction(full_filename)
-            except:
+                file = request.files['input_file']
+                recipe, confidence = get_prediction_file(file)
+            except Exception as e:
                 flash("Не могу прочитать изображение")
+                if config['debug']:
+                    flash(str(e))
                 return redirect('/')
-            return render_index(form, recipe)
+            return render_index(form, recipe, confidence)
         if url_exist:
-            image_url = request.form["image_url"]
-            full_filename = os.path.join(app.config['UPLOAD_FOLDER'], 'download.jpg')
             try:
-                if os.path.exists(full_filename):
-                    os.remove(full_filename)
-                wget.download(image_url, full_filename)
-                recipe = getPrediction(full_filename)
-            except:
+                image_url = request.form["image_url"]
+                recipe, confidence = get_prediction_url(image_url)
+            except Exception as e:
                 replace_image()
                 flash("Не могу прочитать изображение")
-            return render_index(form, recipe)
+                if config['debug']:
+                    flash(str(e))
+
+            return render_index(form, recipe, confidence)
     else:
         replace_image()
-        return render_index(form, recipe)
+        return render_index(form, recipe, confidence)
 
 
-def replace_image():
-    os.popen(f'cp {UPLOAD_FOLDER}placeholder.jpg {UPLOAD_FOLDER}download.jpg')
+def render_index(form, recipe, confidence):
+    confidence = calibrate_confidence(confidence)
 
+    if confidence > 0.005:
+        conf_text = f'Я уверен на {round(confidence * 100)}%!'
+    else:
+        conf_text = ''
 
-def render_index(form, recipe):
-    return render_template('index.html', form=form, recipe=recipe, ingr_text=ingredients_text)
-
-
-if __name__ == "__main__":
-    app.run(debug=True)
+    return render_template('index.html',
+                           form=form,
+                           recipe=recipe,
+                           ingr_text=ingredients_text,
+                           conf_text=conf_text)

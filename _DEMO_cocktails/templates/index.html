@@ -26,7 +26,7 @@
                   {{ form.input_file(id="my-file-selector") }}
                   Открыть...
               </label>
-              <input type="text" id="input_filename" name="image_filename" class="form-control" readonly>
+              <label for="input_filename"></label><input type="text" id="input_filename" name="image_filename" class="form-control" readonly>
           </div>
           {{ form.submit(class_="btn btn-primary") }}
       </form>
@@ -35,13 +35,14 @@
 
       <form class="form-inline center-block" action="/" method="POST" enctype="multipart/form-data">
           <h4>Или вставь URL ссылку и нажми "Приготовить!"</h4>
-            <input type="url" id="input_url" name="image_url" class="form-control" placeholder="Ссылка на изображение" style="min-width:67%">
+          <label for="input_url"></label><input type="url" id="input_url" name="image_url" class="form-control" placeholder="Ссылка на изображение" style="min-width:67%">
           {{ form.submit(class_="btn btn-primary") }}
       </form>
     </div>
 
     <div class="page-header">
       <h4>{{ recipe }}</h4>
+      <h4>{{ conf_text }}</h4>
       <img src="{{url_for('static', filename = 'images/download.jpg')}}" class="img-thumbnail" alt="Твой коктейль не загрузился" width=auto height=auto style="max-height:500px; max-width:100%">
     </div>
   </div>
@@ -61,30 +62,25 @@
         <a href="https://github.com/PolushinM/CocktailMan" style="color:#2a6181">github.com/PolushinM/CocktailMan</a>
     </div>
 
-
-
-    <script>
-        function show() {
-            const ingredients = document.getElementById('ingredients');
-            if (ingredients.style.display === "none") {
-               ingredients.style.display = "block";
-               ingredients.scrollIntoView({block: "center", behavior: "smooth"});
-               document.getElementById("ingred_embed").style.color = "#153e59";
-            } else {
-                document.getElementById('ingredients').style.display = "none"
-               }
-        }
-    </script>
-
 {% endblock %}
-
-
-
 
 {% block scripts %}
 {{ super() }}
-<script src="{{ url_for('.static', filename='js/inputFileButton.js') }}" ></script>
 
+<script>
+    function show() {
+        const ingredients = document.getElementById('ingredients');
+        if (ingredients.style.display === "none") {
+           ingredients.style.display = "block";
+           ingredients.scrollIntoView({block: "center", behavior: "smooth"});
+           document.getElementById("ingred_embed").style.color = "#153e59";
+        } else {
+            document.getElementById('ingredients').style.display = "none"
+           }
+    }
+</script>
+
+<script src="{{ url_for('.static', filename='js/inputFileButton.js') }}" ></script>
 {% endblock %}
 
 </html>

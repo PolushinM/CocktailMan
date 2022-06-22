@@ -1,8 +1,0 @@
-pyvenv.cfg
-/lib
-/.idea
-/bin
-/__pycache__
-.gitignore
-Procfile
-runtime.txt

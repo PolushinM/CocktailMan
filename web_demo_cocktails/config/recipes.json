@@ -1,0 +1,776 @@
+{
+	"Americano": 
+	[
+		"vermouth",
+		"red_bitter",
+		"sprite",
+		"orange_peel",
+		"ice"
+	],
+	
+	"B_52": 
+	[
+		"coffee_liq",
+		"irish_cream",
+		"orange_liq"
+	],
+	
+	"Beer": 
+	[
+		"beer"
+	],
+	
+	"Bianco_sunrise": 
+	[
+		"vermouth",
+		"cranberry_juice",
+		"orange_juice",
+		"orange_peel",
+		"ice"
+	],
+	
+	"Black_russian": 
+	[
+		"vodka",
+		"coffee_liq",
+		"ice"
+	],
+	
+	"Blood_sand": 
+	[
+		"whiskey",
+		"vermouth",
+		"blackcurrant_liq",
+		"orange_juice",
+		"orange_peel"
+	],
+	
+	"Bloody_mary": 
+	[
+		"vodka",
+		"tomato_juice",
+		"lemon_juice",
+		"celery",
+		"tabasco",
+		"salt"
+	],
+		
+	"Blowjob": 
+	[
+		"coffee_liq",
+		"irish_cream",
+		"cream"
+	],
+
+	"Blue_lagoon": 
+	[
+		"vodka",
+		"blue_curacao",
+		"sprite",
+		"ice"
+	],
+
+	"Boston_tea": 
+	[
+		"rum",
+		"gin",
+		"vodka",
+		"tequila",
+		"orange_liq",
+		"coffee_liq",
+		"lemon_juice",
+		"cola",
+		"ice"
+	],
+
+	"Boulevardier": 
+	[
+		"whiskey",
+		"red_bitter",
+		"orange_peel",
+		"ice"
+	],
+
+	"Bounty_martini": 
+	[
+		"vodka",
+		"orange_liq",
+		"sugar_syr",
+		"grenadine",
+		"cream",
+		"strawberry"
+	],
+
+	"Boyarsky": 
+	[
+		"vodka",
+		"grenadine",
+		"tabasco"
+	],
+
+	"Bumblbee": 
+	[
+		"sugar_syr",
+		"orange_juice",
+		"coffee",
+		"ice"
+	],
+
+	"Caipiroska": 
+	[
+		"vodka",
+		"sugar_syr",
+		"lime",
+		"ice"
+	],
+
+	"Calimocho": 
+	[
+		"wine",
+		"cola",
+		"ice"
+	],
+
+	"Campari_tonic": 
+	[
+		"red_bitter",
+		"tonic",
+		"lime",
+		"ice"
+	],
+
+	"Cape_coder": 
+	[
+		"vodka",
+		"cranberry_juice",
+		"ice"
+	],
+
+	"Cardinal": 
+	[
+		"wine",
+		"blackcurrant_liq",
+		"ice"
+	],
+
+	"Celery": 
+	[
+		"celery"
+	],
+
+	"Chocolate": 
+	[
+		"chocolate",
+		"cream",
+		"ice_cream",
+		"milk",
+		"irish_cream"
+	],
+
+	"Coffe_milk": 
+	[
+		"coffee",
+		"milk"
+	],
+
+	"Cola": 
+	[
+		"cola",
+		"ice"
+	],
+
+	"Cosmopolitan": 
+	[
+		"orange_liq",
+		"cranberry_juice",
+		"lemon_juice",
+		"vodka",
+		"lemon"
+	],
+
+	"Cream": 
+	[
+		"cream"
+	],
+
+	"Cuba_libre": 
+	[
+		"rum",
+		"cola",
+		"lime",
+		"ice"
+	],
+
+	"Daiquiri": 
+	[
+		"rum",
+		"lemon_juice",
+		"lemon",
+		"sugar_syr"
+	],
+
+	"Dog_ru": 
+	[
+		"vodka",
+		"lemon_juice",
+		"tabasco"
+	],
+
+	"Ersh": 
+	[
+		"beer",
+		"vodka"
+	],
+
+	"Espresso": 
+	[
+		"coffee"
+	],
+
+	"Espresso_martini": 
+	[
+		"vodka",
+		"coffee_liq",
+		"sugar_syr",
+		"coffee"
+	],
+
+	"Garibaldi": 
+	[
+		"red_bitter",
+		"orange_juice",
+		"orange_peel",
+		"ice"
+	],
+
+	"Gin": 
+	[
+		"gin"
+	],
+
+	"Gin_tonic": 
+	[
+		"gin",
+		"tonic",
+		"lemon",
+		"ice"
+	],
+
+	"Godfather": 
+	[
+		"whiskey",
+		"orange_liq",
+		"ice"
+	],
+
+	"Golden_rum_pineapple": 
+	[
+		"rum",
+		"sugar_syr",
+		"lemon_juice",
+		"pinapple_juice",
+		"ice"
+	],
+
+	"Highball": 
+	[
+		"whiskey",
+		"sprite",
+		"strawberry",
+		"ice"
+	],
+
+	"Hurricane": 
+	[
+		"rum",
+		"sugar_syr",
+		"grenadine",
+		"orange_juice",
+		"pinapple_juice",
+		"lemon_juice",
+		"lemon",
+		"ice"
+	],
+
+	"Irish_coffee": 
+	[
+		"whiskey",
+		"sugar_syr",
+		"coffee",
+		"cream"
+	],
+
+	"Irish_cream": 
+	[
+		"irish_cream",
+		"ice"
+	],
+
+	"Jellyfish": 
+	[
+		"coconut_liq",
+		"rum",
+		"irish_cream",
+		"orange_liq",
+		"blue_curacao"
+	],
+
+	"Lemon": 
+	[
+		"lemon"
+	],
+
+	"Lemon_juice": 
+	[
+		"lemon_juice",
+		"lemon"
+	],
+
+	"Lime": 
+	[
+		"lime"
+	],
+
+	"London_mint_swizzle": 
+	[
+		"gin",
+		"sugar_syr",
+		"lemon_juice",
+		"sprite",
+		"mint",
+		"ice"
+	],
+
+	"Long_island_iced_tea": 
+	[
+		"vodka",
+		"rum",
+		"tequila",
+		"gin",
+		"orange_liq",
+		"sugar_syr",
+		"lemon_juice",
+		"cola",
+		"lemon",
+		"ice"
+	],
+
+	"Mai_thai": 
+	[
+		"rum",
+		"orange_liq",
+		"sugar_syr",
+		"lemon_juice",
+		"lime",
+		"mint",
+		"ice"
+	],
+
+	"Manhattan": 
+	[
+		"whiskey",
+		"vermouth",
+		"red_bitter"
+	],
+
+	"Margarita": 
+	[
+		"tequila",
+		"orange_liq",
+		"lemon_juice",
+		"sugar_syr",
+		"lemon",
+		"salt"
+	],
+
+	"Martinez": 
+	[
+		"gin",
+		"vermouth",
+		"orange_liq",
+		"red_bitter",
+		"orange_peel"
+	],
+
+	"Martini_dry": 
+	[
+		"gin",
+		"vermouth"
+	],
+
+	"Martini_tonic": 
+	[
+		"vermouth",
+		"tonic",
+		"lime",
+		"ice"
+	],
+
+	"Milk": 
+	[
+		"milk"
+	],
+
+	"Mint": 
+	[
+		"mint"
+	],
+
+	"Mint_julep": 
+	[
+		"whiskey",
+		"sugar_syr",
+		"mint",
+		"ice"
+	],
+
+	"Mojito": 
+	[
+		"rum",
+		"sugar_syr",
+		"sprite",
+		"mint",
+		"lime",
+		"ice"
+	],
+
+	"Mulled_wine": 
+	[
+		"wine",
+		"sugar_syr",
+		"lemon",
+		"orange_peel"
+	],
+
+	"Negroni": 
+	[
+		"gin",
+		"vermouth",
+		"red_bitter",
+		"orange_peel",
+		"ice"
+	],
+
+	"No_drink": 
+	[],
+
+	"Old_fashioned": 
+	[
+		"whiskey",
+		"red_bitter",
+		"sugar_syr",
+		"orange_peel",
+		"ice"
+	],
+
+	"Orange_peel": 
+	[
+		"orange_peel"
+	],
+
+	"Penicillin": 
+	[
+		"whiskey",
+		"tonic",
+		"sugar_syr",
+		"orange_peel",
+		"ice"
+	],
+
+	"Pina_colada": 
+	[
+		"rum",
+		"coconut_syr",
+		"pinapple_juice",
+		"lemon_juice",
+		"ice",
+		"cream"
+	],
+
+	"Purple_rain": 
+	[
+		"vodka",
+		"blue_curacao",
+		"cranberry_juice",
+		"tonic",
+		"grenadine",
+		"ice"
+	],
+
+	"Rainbow": 
+	[
+		"orange_juice",
+		"blue_curacao",
+		"coconut_liq",
+		"vodka",
+		"grenadine",
+		"ice"
+	],
+
+	"Ramos_jin_fizz": 
+	[
+		"gin",
+		"sugar_syr",
+		"lemon_juice",
+		"sprite",
+		"cream",
+		"orange_peel"
+	],
+
+	"Rob_roy": 
+	[
+		"whiskey",
+		"vermouth",
+		"red_bitter",
+		"orange_peel"
+	],
+
+	"Rosso_tonic": 
+	[
+		"vermouth",
+		"tonic",
+		"orange_peel",
+		"ice"
+	],
+
+	"Rum": 
+	[
+		"rum",
+		"ice"
+	],
+
+	"Rum_cola": 
+	[
+		"rum",
+		"cola",
+		"ice"
+	],
+
+	"Rum_collins": 
+	[
+		"rum",
+		"sugar_syr",
+		"lemon_juice",
+		"sprite",
+		"lime",
+		"ice"
+	],
+
+	"Rum_orange_juice": 
+	[
+		"rum",
+		"orange_juice",
+		"ice"
+	],
+
+	"Russian_flag": 
+	[
+		"vodka",
+		"blue_curacao",
+		"grenadine"
+	],
+
+	"Rusty_nail": 
+	[
+		"whiskey",
+		"sugar_syr",
+		"orange_peel",
+		"ice"
+	],
+
+	"Sangrita": 
+	[
+		"tequila",
+		"tomato_juice",
+		"lemon_juice",
+		"celery",
+		"tabasco",
+		"salt",
+		"ice"
+	],
+
+	"Scar_face": 
+	[
+		"vodka",
+		"coffee_liq",
+		"irish_cream",
+		"milk",
+		"cream",
+		"ice"
+	],
+
+	"Screwdriver": 
+	[
+		"vodka",
+		"orange_juice",
+		"ice"
+	],
+
+	"Sex_on_the_beach": 
+	[
+		"vodka",
+		"peach_liq",
+		"cranberry_juice",
+		"orange_juice",
+		"pinapple_juice",
+		"ice"
+	],
+
+	"Silver_bullet": 
+	[
+		"tequila",
+		"coffee_liq",
+		"lemon"
+	],
+
+	"Strawberry_margarita": 
+	[
+		"tequila",
+		"orange_liq",
+		"lemon_juice",
+		"sugar_syr",
+		"lemon",
+		"salt",
+		"strawberry",
+		"ice"
+	],
+
+	"Strawberry_milkshake": 
+	[
+		"milk",
+		"gin",
+		"ice_cream",
+		"strawberry",
+		"cream"
+	],
+
+	"Strawberry_mojito": 
+	[
+		"rum",
+		"sugar_syr",
+		"sprite",
+		"mint",
+		"lime",
+		"strawberry",
+		"ice"
+	],
+
+	"Tea": 
+	[
+		"tea"
+	],
+
+	"Tea_milk": 
+	[
+		"tea",
+		"milk"
+	],
+
+	"Tequila": 
+	[
+		"tequila",
+		"lime"
+	],
+
+	"Tequila_batanga": 
+	[
+		"tequila",
+		"lemon_juice",
+		"lime",
+		"cola",
+		"ice"
+	],
+
+	"Tequila_boom": 
+	[
+		"tequila",
+		"sprite"
+	],
+
+	"Tequila_smash": 
+	[
+		"tequila",
+		"sugar_syr",
+		"lemon",
+		"lime",
+		"mint",
+		"ice"
+	],
+	
+		"Tequila_sunrise": 
+	[
+		"tequila",
+		"orange_juice",
+		"grenadine",
+		"ice"
+	],
+
+	"Tom_collins": 
+	[
+		"gin",
+		"sugar_syr",
+		"lemon_juice",
+		"sprite",
+		"orange_peel",
+		"ice"
+	],
+
+	"Tomato_juice": 
+	[
+		"tomato_juice"
+	],
+
+	"Vodka": 
+	[
+		"vodka"
+	],
+
+	"Vodka_energy": 
+	[
+		"vodka",
+		"energy",
+		"ice"
+	],
+
+	"Whiskey": 
+	[
+		"whiskey",
+		"ice"
+	],
+
+	"Whiskey_cola": 
+	[
+		"whiskey",
+		"cola",
+		"ice"
+	],
+
+	"Whiskey_sour": 
+	[
+		"whiskey",
+		"red_bitter",
+		"sugar_syr",
+		"lemon_juice",
+		"ice"
+	],
+
+	"White_lady": 
+	[
+		"gin",
+		"orange_liq",
+		"lemon_juice"
+	],
+
+	"White_russian": 
+	[
+		"vodka",
+		"coffee_liq",
+		"cream",
+		"ice"
+	],
+
+	"Wine": 
+	[
+		"wine"
+	]
+}

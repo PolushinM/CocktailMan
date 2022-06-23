@@ -1,14 +1,9 @@
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileField, FileRequired
+from flask_wtf.file import FileField
 from wtforms import SubmitField
 
 
 class UploadForm(FlaskForm):
-
-    validators = [
-        FileRequired(message='There was no file!'),
-    ]
-
-    input_file = FileField('', validators=validators)
+    input_file = FileField('')
     submit = SubmitField(label="Приготовить!")
 

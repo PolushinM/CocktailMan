@@ -1,10 +1,12 @@
+import os
+
 from flask import Flask, render_template, request, redirect, flash
 from flask_bootstrap import Bootstrap
 from forms import UploadForm
 
-from main import get_prediction_file, ingredients_text, replace_image, calibrate_confidence, get_prediction_url
+from main import get_prediction_file, ingredients_text, replace_image, calibrate_confidence, get_prediction_url, \
+    uri_validator
 from app_config import config
-
 
 # Run flask app with Bootstrap extension
 app = Flask(__name__, static_folder=config['static_folder'])
@@ -18,8 +20,10 @@ def index():
     confidence = 0.
 
     form = UploadForm()
-    file_exist = form.validate_on_submit()
-    url_exist = "image_url" in request.form and len(request.form["image_url"]) > 0
+
+    file_exist = form.validate_on_submit() and request.files['input_file'].filename and len(
+        request.form["image_url"]) > 0
+    url_exist = "image_url" in request.form and uri_validator(request.form["image_url"])
 
     if request.method == 'POST':
         if not file_exist and not url_exist:
@@ -33,7 +37,7 @@ def index():
             except Exception as e:
                 flash("Не могу прочитать изображение")
                 if config['debug']:
-                    flash(str(e))
+                    flash("file_exist_ " + str(e))
                 return redirect('/')
             return render_index(form, recipe, confidence)
         if url_exist:
@@ -44,7 +48,7 @@ def index():
                 replace_image()
                 flash("Не могу прочитать изображение")
                 if config['debug']:
-                    flash(str(e))
+                    flash("url_exist_ " + str(e))
 
             return render_index(form, recipe, confidence)
     else:
@@ -60,8 +64,9 @@ def render_index(form, recipe, confidence):
     else:
         conf_text = ''
 
-    return render_template('index.html',
-                           form=form,
-                           recipe=recipe,
-                           ingr_text=ingredients_text,
-                           conf_text=conf_text)
+    template = render_template('index.html',
+                               form=form,
+                               recipe=recipe,
+                               ingr_text=ingredients_text,
+                               conf_text=conf_text)
+    return template

@@ -8,6 +8,13 @@
 		"ice"
 	],
 	
+	"At_ru": 
+	[
+		"vodka",
+		"lemon_juice",
+		"tabasco"
+	],
+	
 	"B_52": 
 	[
 		"coffee_liq",
@@ -209,13 +216,6 @@
 		"sugar_syr"
 	],
 
-	"Dog_ru": 
-	[
-		"vodka",
-		"lemon_juice",
-		"tabasco"
-	],
-
 	"Ersh": 
 	[
 		"beer",
@@ -272,7 +272,7 @@
 		"ice"
 	],
 
-	"Highball": 
+	"Highball_srawberry": 
 	[
 		"whiskey",
 		"sprite",

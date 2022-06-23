@@ -5,10 +5,10 @@ config = {
     'static_folder': "static",
     'UPLOAD_FOLDER': 'static/images/',
     'secret_key': "546421349874624",
-    'debug': True,
+    'debug': False,
     'json_config_path': 'config/',
-    'onnx_model_path': 'model/classifier_ls.onnx',
-    'threshold': 0.2
+    'onnx_model_path': 'model/classifier.onnx',
+    'threshold': 0.35
 }
 
 

@@ -1,7 +1,9 @@
 import os
 from math import pi, sin
+import urllib.request
 
 import wget
+from urllib.parse import urlparse
 import numpy as np
 from PIL import Image
 from openvino.runtime import Core
@@ -29,8 +31,8 @@ def get_prediction(img_path: str) -> tuple[str, float]:
 
 def open_resized_image(path: str, image_size: int, crop_size: int) -> np.array:
     try:
-        image = Image.open(path)
-    except:
+        image = Image.open(path).convert("RGB")
+    except Exception:
         return [], 0.
     width, height = image.size  # Get dimensions
     size = round(min(width, height) / crop_size * image_size)
@@ -44,18 +46,17 @@ def open_resized_image(path: str, image_size: int, crop_size: int) -> np.array:
     image = image.crop((left, top, right, bottom))
 
     return np.asarray(image.resize((image_size, image_size))) / 127.5 - 1.0
-    
-    
-def predict_ingredients(path: str, 
-                        model: callable, 
-                        classes: np.array, 
-                        image_size: int, 
-                        crop_size: int, 
+
+
+def predict_ingredients(path: str,
+                        model: callable,
+                        classes: np.array,
+                        image_size: int,
+                        crop_size: int,
                         threshold=0.5) -> tuple[list[int], float]:
-    
     img = open_resized_image(path, image_size, crop_size)
-    
-    logits = model([np.rollaxis(img, 2, 0)[None, 0:3, :, :]])[model.output(0)][0]
+
+    logits = model([np.rollaxis(img, 2, 0)[None, :, :, :]])[model.output(0)][0]
     probs = 1 / (1 + np.exp(-logits))
 
     ingredients = classes[(probs > threshold).nonzero()]
@@ -83,13 +84,30 @@ def get_prediction_url(image_url: str) -> tuple[str, float]:
     full_filename = os.path.join(config["UPLOAD_FOLDER"], "download.jpg")
     if os.path.exists(full_filename):
         os.remove(full_filename)
-    wget.download(image_url, full_filename)
+    try:
+        wget.download(image_url, full_filename)
+    except Exception:
+        req = urllib.request.Request(
+            image_url,
+            data=None,
+            headers={
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) '
+                              'Chrome/35.0.1916.47 Safari/537.36 '
+            }
+        )
+        file = open(full_filename, "wb")
+        try:
+            file.write(urllib.request.urlopen(req).read())
+        except Exception:
+            pass
+        finally:
+            file.close()
     return get_prediction(full_filename)
 
 
 def get_prediction_file(file):
-    file.save(os.path.join(config["UPLOAD_FOLDER"], "download.jpg"))
     full_filename = os.path.join(config["UPLOAD_FOLDER"], "download.jpg")
+    file.save(full_filename)
     return get_prediction(full_filename)
 
 
@@ -99,3 +117,11 @@ def calibrate_confidence(confidence: float) -> float:
 
 def replace_image():
     os.popen(f'cp {config["UPLOAD_FOLDER"]}placeholder.jpg {config["UPLOAD_FOLDER"]}download.jpg')
+
+
+def uri_validator(x):
+    try:
+        result = urlparse(x)
+        return all([result.scheme, result.netloc])
+    except Exception:
+        return False

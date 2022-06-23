@@ -17,7 +17,7 @@
   {%- endwith %}
 
     <h1>CocktailMan</h1>
-    <h4>Выбери изображение</h4>
+    <h4>Выбери файл с изображением или вставь ссылку:</h4>
     <div class="row">
       <form class="form-inline center-block" action="/" method="POST" enctype="multipart/form-data">
           {{ form.hidden_tag() }}
@@ -26,16 +26,8 @@
                   {{ form.input_file(id="my-file-selector") }}
                   Открыть...
               </label>
-              <label for="input_filename"></label><input type="text" id="input_filename" name="image_filename" class="form-control" readonly>
+              <label for="input_url"></label><input type="text" id="input_url" name="image_url" class="form-control" placeholder="Ссылка на изображение">
           </div>
-          {{ form.submit(class_="btn btn-primary") }}
-      </form>
-
-      <br>
-
-      <form class="form-inline center-block" action="/" method="POST" enctype="multipart/form-data">
-          <h4>Или вставь URL ссылку и нажми "Приготовить!"</h4>
-          <label for="input_url"></label><input type="url" id="input_url" name="image_url" class="form-control" placeholder="Ссылка на изображение" style="min-width:67%">
           {{ form.submit(class_="btn btn-primary") }}
       </form>
     </div>
@@ -66,21 +58,8 @@
 
 {% block scripts %}
 {{ super() }}
-
-<script>
-    function show() {
-        const ingredients = document.getElementById('ingredients');
-        if (ingredients.style.display === "none") {
-           ingredients.style.display = "block";
-           ingredients.scrollIntoView({block: "center", behavior: "smooth"});
-           document.getElementById("ingred_embed").style.color = "#153e59";
-        } else {
-            document.getElementById('ingredients').style.display = "none"
-           }
-    }
-</script>
-
-<script src="{{ url_for('.static', filename='js/inputFileButton.js') }}" ></script>
+    <script src="{{ url_for('.static', filename='js/inputFileButton.js') }}" ></script>
+    <script src="{{ url_for('.static', filename='js/showIngredients.js') }}" ></script>
 {% endblock %}
 
 </html>

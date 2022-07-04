@@ -37,7 +37,7 @@ def index():
             except Exception as e:
                 flash("Не могу прочитать изображение")
                 if config['debug']:
-                    flash("file_exist_ " + str(e))
+                    print("file_exist_ " + str(e))
                 return redirect('/')
             return render_index(form, recipe, confidence)
         if url_exist:
@@ -48,7 +48,7 @@ def index():
                 replace_image()
                 flash("Не могу прочитать изображение")
                 if config['debug']:
-                    flash("url_exist_ " + str(e))
+                    print("url_exist_ " + str(e))
 
             return render_index(form, recipe, confidence)
     else:

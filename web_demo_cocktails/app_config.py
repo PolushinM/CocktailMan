@@ -1,6 +1,7 @@
 import json
 import numpy as np
 
+
 config = {
     'static_folder': "static",
     'UPLOAD_FOLDER': 'static/images/',

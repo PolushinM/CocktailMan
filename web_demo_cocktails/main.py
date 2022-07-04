@@ -1,4 +1,5 @@
 import os
+import ssl
 from math import pi, sin
 import urllib.request
 
@@ -18,6 +19,9 @@ ie = Core()
 model_onnx = ie.read_model(model=config["onnx_model_path"])
 compiled_model_onnx = ie.compile_model(model=model_onnx, device_name="CPU")
 
+# Allow using unverified SSL for image downloading
+ssl._create_default_https_context = ssl._create_unverified_context
+
 
 def get_prediction(img_path: str) -> tuple[str, float]:
     ingredients, confidence = predict_ingredients(path=img_path,
@@ -35,7 +39,7 @@ def open_resized_image(path: str, image_size: int, crop_size: int) -> np.array:
     except Exception:
         return [], 0.
     width, height = image.size  # Get dimensions
-    size = round(min(width, height) / crop_size * image_size)
+    size = round(min(width, height) / crop_size**0.5 * image_size**0.5)
 
     left = (width - size) / 2
     top = (height - size) / 2
@@ -86,7 +90,7 @@ def get_prediction_url(image_url: str) -> tuple[str, float]:
         os.remove(full_filename)
     try:
         wget.download(image_url, full_filename)
-    except Exception:
+    except Exception as e_wget:
         req = urllib.request.Request(
             image_url,
             data=None,
@@ -98,7 +102,9 @@ def get_prediction_url(image_url: str) -> tuple[str, float]:
         file = open(full_filename, "wb")
         try:
             file.write(urllib.request.urlopen(req).read())
-        except Exception:
+        except Exception as e_urllib:
+            if config['debug']:
+                print(e_urllib)
             pass
         finally:
             file.close()

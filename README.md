@@ -1,6 +1,7 @@
 ## CocktailMan
 
-[![Python application](https://github.com/PolushinM/CocktailMan/actions/workflows/python-app.yml/badge.svg)](https://github.com/PolushinM/CocktailMan/actions/workflows/python-app.yml)
+[![Test](https://github.com/PolushinM/CocktailMan/actions/workflows/python-app.yml/badge.svg)](https://github.com/PolushinM/CocktailMan/actions/workflows/python-app.yml)
+[![Pylint](https://github.com/PolushinM/CocktailMan/actions/workflows/pylint.yml/badge.svg)](https://github.com/PolushinM/CocktailMan/actions/workflows/pylint.yml)
 
 [Интернет-сайт](https://cocktailman.herokuapp.com/) ([зеркало](https://cocktailman-d.herokuapp.com/)), на котором работают три обученные мной нейросетевые модели:
 1. Классификатор, который по фото коктейля подсказывает ингредиенты, из которых его можно приготовить. (Уже работает)

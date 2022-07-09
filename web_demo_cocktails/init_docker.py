@@ -1,7 +1,5 @@
-import os
-from app import app
-from app_config import config
+from views import app
+from config import DOCKER_PORT, DEBUG, DOCKER_HOST
 
 if __name__ == "__main__":
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=config['debug'])
+    app.run(host=DOCKER_HOST, port=DOCKER_PORT, debug=DEBUG)

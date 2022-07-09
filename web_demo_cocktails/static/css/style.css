@@ -2,7 +2,7 @@ body {
   padding: 5px 30px;
   max-width : 500px;
   min-width : 300px;
-  margin: 0px auto;
+  margin: 0 auto;
 }
 
 .theme-dropdown .dropdown-menu {
@@ -23,10 +23,18 @@ body {
   white-space: pre-wrap;
 }
 
+.img-thumbnail {
+  width: auto;
+  height: auto;
+  max-height: 500px;
+  max-width: 100%;
+}
+
+
 #browsebutton {
   background-color: white;
 }
 
-#my-file-selector {
+#file-selector {
     display: none;
 }

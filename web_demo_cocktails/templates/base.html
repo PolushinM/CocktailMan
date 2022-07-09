@@ -17,6 +17,7 @@
 {# While we are at it, we also enable fixes for legacy browsers. First we
    import the necessary macros: #}
 {% import "bootstrap/fixes.html" as fixes %}
+{% import "bootstrap/utils.html" as utils %}
 
 {# Then, inside the head block, we apply these. To not replace the header,
    ``super()`` is used: #}
@@ -34,6 +35,6 @@
 {% block styles -%}
     {{super()}}  {# do not forget to call super or Bootstrap's own stylesheets
                     will disappear! #}
-    <link type="text/css" rel="stylesheet" href="{{ url_for('.static', filename='css/style.css') }}" />
+    <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
 {% endblock %}
 

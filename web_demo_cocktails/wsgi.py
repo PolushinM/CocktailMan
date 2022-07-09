@@ -1,4 +1,3 @@
-import os
 from views import app
 from config import DEBUG, WSGI_HOST, WSGI_PORT
 

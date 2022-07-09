@@ -3,3 +3,5 @@ pyvenv.cfg
 /.idea
 /bin
 /__pycache__
+.gitignore
+/tests/.pytest_cache

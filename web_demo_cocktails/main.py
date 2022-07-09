@@ -25,14 +25,13 @@ def get_prediction(img_path: str) -> tuple[str, float]:
 
 
 def generate_recipe(ingredients: list) -> str:
-    recipe = ""
+    recipe = "Не могу найти напиток на изображении."
     if len(ingredients) > 0:
         if len(ingredients) > 1:
             recipe = ", ".join(ingredients[:-1])
             recipe = "".join(["Попробуем добавить ", recipe, " и ", ingredients[-1], "."])
         else:
             recipe = "".join(["Добавим только ", ingredients[-1], "."])
-        recipe = "Не могу найти напиток на изображении."
     return recipe
 
 

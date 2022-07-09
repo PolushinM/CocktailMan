@@ -28,8 +28,8 @@ class Model:
         id2rus_genitive = ingedients_config["id2rus_genitive"]
         id2rus_nominative = ingedients_config["id2rus_nominative"]
         class_labels_rus = np.array([id2rus_genitive[idx] for idx in class_labels])
-        ingredients_txt = "\n".join([id2rus_nominative[idx].capitalize() for idx in class_labels])
-        return model_config, class_labels_rus, ingredients_txt
+        ingredients_list = [id2rus_nominative[idx].capitalize() for idx in class_labels]
+        return model_config, class_labels_rus, ingredients_list
 
     def predict_ingredients(self, path: str, threshold=0.5) -> tuple[list[int], float]:
         img = self.__open_resized_image(path, int(self.model_conf["image_size"]), int(self.model_conf["crop_size"]))

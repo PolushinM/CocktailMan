@@ -1,9 +1,11 @@
 import unittest
 import os
+import sys
 from pathlib import Path
 
 from flask import url_for
 
+sys.path.append(str(Path(__file__).parent.parent))
 os.chdir(str(Path(__file__).parent.parent))
 from views import app
 

@@ -13,7 +13,7 @@ from model import Model
 files_to_delete = []
 
 model = Model(ONNX_MODEL_PATH, MODEL_CONFIG_PATH)
-ingredients_text = model.ingredients_text
+INGREDIENTS_TEXT = model.ingredients_text
 
 # Allow using unverified SSL for image downloading
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -25,15 +25,15 @@ def get_prediction(img_path: str) -> tuple[str, float]:
 
 
 def generate_recipe(ingredients: list) -> str:
+    recipe = ""
     if len(ingredients) > 0:
         if len(ingredients) > 1:
             recipe = ", ".join(ingredients[:-1])
             recipe = "".join(["Попробуем добавить ", recipe, " и ", ingredients[-1], "."])
         else:
             recipe = "".join(["Добавим только ", ingredients[-1], "."])
-        return recipe
-    else:
-        return "Не могу найти напиток на изображении."
+        recipe = "Не могу найти напиток на изображении."
+    return recipe
 
 
 def get_prediction_url(image_url: str) -> tuple[str, float, str]:
@@ -51,7 +51,6 @@ def get_prediction_url(image_url: str) -> tuple[str, float, str]:
     except Exception as e_urllib:
         if DEBUG:
             print(e_urllib)
-        pass
     finally:
         file.close()
 
@@ -69,4 +68,3 @@ def get_prediction_file(file):
     files_to_delete.append(full_filename)
     print(files_to_delete)
     return recipe, confidence, filename
-

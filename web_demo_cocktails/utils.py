@@ -32,9 +32,9 @@ def get_confidence_text(confidence: float) -> str:
     return conf_text
 
 
-def uri_validator(x):
+def uri_validator(uri):
     try:
-        result = urlparse(x)
+        result = urlparse(uri)
         return all([result.scheme, result.netloc])
-    except Exception as e:
+    except Exception:
         return False

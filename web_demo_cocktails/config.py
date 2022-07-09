@@ -31,7 +31,8 @@ DEFAULT_WSGI_PORT = 5000
 WSGI_PORT = int(os.environ.get('PORT', DEFAULT_WSGI_PORT))
 
 REQUEST_HEADERS = {
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) '
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) '
+                          'AppleWebKit/537.36 (KHTML, like Gecko) '
                           'Chrome/35.0.1916.47 Safari/537.36 '
             }
 
@@ -42,7 +43,3 @@ ONNX_MODEL_PATH = 'model/classifier.onnx'
 PROBA_THRESHOLD = 0.3
 
 RANDOM_FILENAME_LENGTH = 10
-
-
-
-

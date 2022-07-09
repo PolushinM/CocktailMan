@@ -2,7 +2,7 @@ from flask import render_template, request, flash, send_from_directory
 
 from forms import UploadForm
 
-from main import get_prediction_file, ingredients_text, get_prediction_url
+from main import get_prediction_file, INGREDIENTS_TEXT, get_prediction_url
 from utils import get_confidence_text, uri_validator
 from config import DEBUG, CACHE_FOLDER
 
@@ -31,23 +31,23 @@ def index():
                 file = request.files['input_file']
                 recipe, confidence, filename = get_prediction_file(file)
                 return render_index(form, recipe, confidence, filename)
-            except Exception as e:
+            except Exception as exception:
                 flash("Не могу прочитать изображение")
                 if DEBUG:
-                    print("file_exist_ " + str(e))
+                    print("file_exist_ " + str(exception))
                 return render_index(form, recipe, confidence)
         if url_exist:
             try:
                 image_url = request.form['image_url']
                 recipe, confidence, filename = get_prediction_url(image_url)
                 return render_index(form, recipe, confidence, filename)
-            except Exception as e:
+            except Exception as exception:
                 flash("Не могу прочитать изображение")
                 if DEBUG:
-                    print("url_exist_ " + str(e))
+                    print("url_exist_ " + str(exception))
                 return render_index(form, recipe, confidence)
-    else:
-        return render_index(form, recipe, confidence)
+
+    return render_index(form, recipe, confidence)
 
 
 @app.route('/cache/<path:filename>')
@@ -59,7 +59,7 @@ def render_index(form, recipe, confidence, image_filename="placeholder"):
     template = render_template('index.html',
                                form=form,
                                recipe=recipe,
-                               ingr_text=ingredients_text,
+                               ingr_text=INGREDIENTS_TEXT,
                                conf_text=get_confidence_text(confidence),
                                image_filename=image_filename)
     return template

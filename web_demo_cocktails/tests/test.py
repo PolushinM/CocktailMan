@@ -21,11 +21,9 @@ class HomePageDisplayTestCase(unittest.TestCase):
         self.app = app.test_client()
         self.ctx = app.test_request_context()
         self.ctx.push()
-        return
 
     def tearDown(self):
         self.ctx.pop()
-        return
 
     def test_main_text_displayed(self):
         self.assertGreater(2.0, 1.0)
@@ -33,7 +31,6 @@ class HomePageDisplayTestCase(unittest.TestCase):
         response_data = response.data.decode('utf-8')
         for string in TEST_TEXT:
             assert string in response_data
-        return
 
 
 if __name__ == '__main__':

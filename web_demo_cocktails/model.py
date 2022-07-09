@@ -5,7 +5,7 @@ from openvino.runtime import Core
 from PIL import Image
 
 
-class Model(object):
+class Model:
     def __init__(self, onnx_model_path, model_config_path):
         # Loading JSON config
         self.model_conf, \
@@ -13,18 +13,17 @@ class Model(object):
         self.ingredients_text = self.__import_json_model_config(model_config_path)
 
         # Loading the ONNX model
-        ie = Core()
-        model_onnx = ie.read_model(model=onnx_model_path)
-        self.model_onnx = ie.compile_model(model=model_onnx, device_name="CPU")
-        return
+        onnx_core = Core()
+        model_onnx = onnx_core.read_model(model=onnx_model_path)
+        self.model_onnx = onnx_core.compile_model(model=model_onnx, device_name="CPU")
 
     def __import_json_model_config(self, model_config_path: str):
         # Opening model JSON config
-        with open(''.join([model_config_path, 'model.json']), 'r') as f:
-            model_config = json.load(f)
+        with open(''.join([model_config_path, 'model.json']), 'r', encoding="utf-8") as file:
+            model_config = json.load(file)
         # Opening ingredients JSON config
-        with open(''.join([model_config_path, 'ingredients.json']), 'r') as f:
-            ingedients_config = json.load(f)
+        with open(''.join([model_config_path, 'ingredients.json']), 'r', encoding="utf-8") as file:
+            ingedients_config = json.load(file)
         class_labels = ingedients_config["idx"]
         id2rus_genitive = ingedients_config["id2rus_genitive"]
         id2rus_nominative = ingedients_config["id2rus_nominative"]

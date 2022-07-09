@@ -21,4 +21,4 @@ jobs:
         if [ -f ./web_demo_cocktails/requirements.txt ]; then pip install -r ./web_demo_cocktails/requirements.txt; fi
     - name: Analysing the code with pylint
       run: |
-        pylint $(git ls-files '*.py')
+        pylint --fail-under=7 $(git ls-files '*.py')

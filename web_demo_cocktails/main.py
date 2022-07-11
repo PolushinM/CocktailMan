@@ -9,7 +9,7 @@ from config import (CACHE_FOLDER, DEBUG, CLASSIFIER_CONF_THRESHOLD, MAX_FILE_SIZ
                     DETECTOR_CONFIG_PATH, BBOX_EXPANSION, BBOX_LINE_THICKNESS, BBOX_CONF_THRESHOLD)
 
 from utils import get_random_filename, clear_cache
-from models import Classifier, Detector
+from models.models import Classifier, Detector
 
 files_to_delete = []
 

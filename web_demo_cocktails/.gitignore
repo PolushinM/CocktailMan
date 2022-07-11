@@ -1,4 +1,5 @@
 /bin
+/heroku-deploy
 /.idea
 /lib
 /__pycache__

@@ -1,7 +1,10 @@
-pyvenv.cfg
-/lib
-/.idea
 /bin
+/.idea
+/lib
 /__pycache__
-.gitignore
 /tests/.pytest_cache
+
+lib64
+
+.gitignore
+pyvenv.cfg

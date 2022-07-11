@@ -1,8 +1,9 @@
+import os
 from flask import render_template, request, flash, send_from_directory
 
 from forms import UploadForm
 
-from main import get_prediction_file, INGREDIENTS_TEXT, get_prediction_url
+from main import predict_ingredients_from_file, INGREDIENTS_TEXT, predict_ingredients_from_url, draw_bounding_box
 from utils import get_confidence_text, uri_validator
 from config import DEBUG, CACHE_FOLDER
 
@@ -29,7 +30,8 @@ def index():
         if file_exist:
             try:
                 file = request.files['input_file']
-                recipe, confidence, filename = get_prediction_file(file)
+                recipe, confidence, filename = predict_ingredients_from_file(file)
+                draw_bounding_box(os.path.join(CACHE_FOLDER, filename))
                 return render_index(form, recipe, confidence, filename)
             except Exception as exception:
                 flash("Не могу прочитать изображение")
@@ -39,7 +41,8 @@ def index():
         if url_exist:
             try:
                 image_url = request.form['image_url']
-                recipe, confidence, filename = get_prediction_url(image_url)
+                recipe, confidence, filename = predict_ingredients_from_url(image_url)
+                draw_bounding_box(os.path.join(CACHE_FOLDER, filename))
                 return render_index(form, recipe, confidence, filename)
             except Exception as exception:
                 flash("Не могу прочитать изображение")

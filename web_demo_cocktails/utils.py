@@ -38,3 +38,7 @@ def uri_validator(uri):
         return all([result.scheme, result.netloc])
     except Exception:
         return False
+
+
+def clip(val, min_, max_):
+    return min_ if val < min_ else max_ if val > max_ else val

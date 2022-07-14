@@ -5,33 +5,13 @@ body {
   margin: 0 auto;
 }
 
-.theme-dropdown .dropdown-menu {
-  position: static;
-  display: block;
-  margin-bottom: 20px;
-}
-
-.theme-showcase > p > .btn {
-  margin: 5px 0;
-}
-
-.theme-showcase .navbar .container {
-  width: auto;
-}
-
-.multiline {
-  white-space: pre-wrap;
-}
-
-.img-thumbnail {
-  width: auto;
-  height: auto;
-  max-height: 500px;
-  max-width: 100%;
+.popover {
+  position: relative;
+  left: 18.7% !important;
 }
 
 .popover .arrow {
-    left: 90% !important;
+  left: 90% !important;
 }
 
 #browsebutton {
@@ -40,4 +20,22 @@ body {
 
 #file-selector {
     display: none;
+}
+
+#ingr_list {
+  color:#132c3b;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  cursor: pointer;
+}
+
+#img_cocktail {
+  width: auto;
+  height: auto;
+  max-height: 500px;
+  max-width: 100%;
+}
+
+#github_link {
+  color: #2a6181
 }

@@ -1,7 +1,39 @@
+const popover_link = $('[data-toggle="ingr_popover"]');
+let popower_visible = false;
+
+
 $(function () {
-    $('[data-toggle="popover"]').popover({
+    popover_link.popover({
     content: ingredients,
     html: true,
+    container: '#main_container',
     placement: 'bottom',
+    trigger: 'manual',
     })
 })
+
+popover_link.on('hidden.bs.popover', function () {
+  popower_visible = false;
+})
+
+popover_link.on('shown.bs.popover', function () {
+  popower_visible = true;
+})
+
+popover_link.click(function() {
+    if (popower_visible) {
+         popover_link.popover('hide')
+    }
+    else {
+        popover_link.popover('show')
+    }
+})
+
+popover_link.focus(function() {
+    popover_link.popover('show')
+})
+
+popover_link.blur(function() {
+    popover_link.popover('hide')
+})
+

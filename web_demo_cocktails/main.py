@@ -53,7 +53,7 @@ def predict_ingredients_from_url(image_url: str) -> tuple[str, float, str]:
         file.write(urllib.request.urlopen(req).read(MAX_FILE_SIZE))
     except Exception as e_urllib:
         if DEBUG:
-            print(e_urllib)
+            print("urllib", e_urllib)
     finally:
         file.close()
 
@@ -69,7 +69,7 @@ def predict_ingredients_from_file(file):
     file.save(full_filename)
     recipe, confidence = predict_ingredients(full_filename)
     files_to_delete.append(full_filename)
-    print(files_to_delete)
+    print("files_to_delete: ", files_to_delete)
     return recipe, confidence, filename
 
 

@@ -112,7 +112,7 @@ class Detector:
 
             conf_filt = outputs[outputs[:, 4] > threshold*0.5]
             confidence = conf_filt[:, 4] * (conf_filt[:, 41 + 4] +
-                                            conf_filt[:, 42 + 4] +
+                                            conf_filt[:, 42 + 4]*2 +
                                             conf_filt[:, 46 + 4] +
                                             conf_filt[:, 76 + 4]
                                             )  # TODO: get rid of this kluge
@@ -139,7 +139,7 @@ class Detector:
     def add_bounding_box(self, path: str,
                          b_box: Union[Tuple[float, float, float, float], None],
                          thickness: float = 3.,
-                         color: str = "#51546c") -> None:
+                         color: str = "#000000") -> None:
 
         x_min, y_min, x_max, y_max = b_box
         with Image.open(path).convert("RGB") as image:

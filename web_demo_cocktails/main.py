@@ -6,7 +6,7 @@ from werkzeug.utils import secure_filename
 
 from config import (CACHE_FOLDER, DEBUG, CLASSIFIER_CONF_THRESHOLD, MAX_FILE_SIZE, CLASSIFIER_CONFIG_PATH,
                     INGREDIENTS_CONFIG_PATH, CLASSIFIER_MODEL_PATH, REQUEST_HEADERS, DETECTOR_MODEL_PATH,
-                    DETECTOR_CONFIG_PATH, BBOX_EXPANSION, BBOX_LINE_THICKNESS, BBOX_CONF_THRESHOLD)
+                    DETECTOR_CONFIG_PATH, BBOX_EXPANSION, BBOX_LINE_THICKNESS, BBOX_CONF_THRESHOLD, BBOX_LINE_COLOR)
 
 from utils import get_random_filename, clear_cache
 from models.models import Classifier, Detector
@@ -77,4 +77,4 @@ def draw_bounding_box(path: str):
     b_box = detector.predict_bbox(path, threshold=BBOX_CONF_THRESHOLD)
     if b_box is not None:
         print("bbox=", b_box)
-        detector.add_bounding_box(path, b_box, thickness=BBOX_LINE_THICKNESS)
+        detector.add_bounding_box(path, b_box, thickness=BBOX_LINE_THICKNESS, color=BBOX_LINE_COLOR)

@@ -4,7 +4,7 @@ STATIC_FOLDER = "static"
 
 CACHE_FOLDER = "cache"
 
-MAX_FILE_SIZE = 10 ** 7  # bytes
+MAX_FILE_SIZE = 30000000  # bytes
 
 DEFAULT_SECRET_KEY = "12345"
 

@@ -111,22 +111,10 @@ class Detector:
             outputs = self.infer_request.infer(inputs)[self.detector_onnx.output(0)][0]
 
             conf_filt = outputs[outputs[:, 4] > threshold*0.5]
-            confidence = conf_filt[:, 4] * (conf_filt[:, 41 + 4] +
-                                            conf_filt[:, 42 + 4]*2 +
-                                            conf_filt[:, 46 + 4] +
-                                            conf_filt[:, 76 + 4]
-                                            )  # TODO: get rid of this kluge
+            confidence = conf_filt[:, 4] * conf_filt[:, 5]
 
             if confidence.max() > threshold:
-                size_penalty = (conf_filt[:, 2] * conf_filt[:, 3]) ** self.bbox_size_penalty_power
-                eccentricity_penalty = ((conf_filt[:, 0] - self.image_size / 2) ** 2 +
-                                        (conf_filt[:, 1] - self.image_size / 2) ** 2) \
-                                       ** -self.bbox_eccentricity_penalty_power
-                penalties = size_penalty * eccentricity_penalty
-
-                confidence_penalted = confidence * penalties
-
-                bbox = conf_filt[confidence_penalted.argmax(), [0, 1, 2, 3]]
+                bbox = conf_filt[confidence.argmax(), [0, 1, 2, 3]]
                 x_min = (bbox[0] - bbox[2] * 0.5 * self.bbox_expansion) / self.image_size
                 y_min = (bbox[1] - bbox[3] * 0.5 * self.bbox_expansion) / self.image_size
                 x_max = (bbox[0] + bbox[2] * 0.5 * self.bbox_expansion) / self.image_size

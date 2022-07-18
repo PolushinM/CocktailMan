@@ -7,8 +7,6 @@ from PIL import Image, ImageDraw
 from config import DEBUG
 from utils import clip
 
-import time
-
 
 class Classifier:
     def __init__(self, onnx_model_path, model_config_path, ingredients_config_path: str):
@@ -222,7 +220,7 @@ class BlurModel:
         result[0: x_min, y_max:] = box7
         result[0: x_min, y_min: y_max] = box8
 
-        return result[None, None, :, :] ** 2
+        return result[None, None, :, :] ** 1.5
 
     def blur_bounding_box(self, path: str,
                           b_box: Union[Tuple[float, float, float, float], None]) -> None:
@@ -230,9 +228,7 @@ class BlurModel:
             mask = self.__generate_blur_mask(image.size, b_box)
             image = np.moveaxis(np.asarray(image, dtype=np.float32), 2, 0)[None, :, :]
             model_input = np.concatenate((image, mask), axis=1)
-            init_time = time.time()
             blured_image = self.infer_request.infer([model_input])[self.model_output][0]
-            print("Time=", time.time() - init_time)
             blured_image = np.moveaxis(blured_image, 0, 2).astype(np.uint8)
             image = Image.fromarray(blured_image)
             image.save(path, "JPEG")

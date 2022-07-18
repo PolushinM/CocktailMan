@@ -19,9 +19,10 @@ class Classifier:
         self.crop_size = model_conf["CROP_SIZE"]
 
         # Loading the ONNX model
-        onnx_core = Core()
-        model_onnx = onnx_core.read_model(model=onnx_model_path)
-        self.model_onnx = onnx_core.compile_model(model=model_onnx, device_name="CPU")
+        open_vino_ = Core()
+        model_onnx = open_vino_.read_model(model=onnx_model_path)
+        self.model_onnx = open_vino_.compile_model(model=model_onnx, device_name="CPU")
+        del model_onnx
 
     def __import_json_model_config(self, model_config_path: str, ingredients_config_path: str):
         # Opening model JSON config
@@ -82,10 +83,11 @@ class Detector:
         self.bbox_expansion = 0.
 
         # Loading the ONNX model
-        onnx_core = Core()
-        model_onnx = onnx_core.read_model(model=onnx_model_path)
-        self.detector_onnx = onnx_core.compile_model(model=model_onnx, device_name="CPU")
+        open_vino_core = Core()
+        model_onnx = open_vino_core.read_model(model=onnx_model_path)
+        self.detector_onnx = open_vino_core.compile_model(model=model_onnx, device_name="CPU")
         self.infer_request = self.detector_onnx.create_infer_request()
+        del model_onnx
 
     def __open_image(self, path: str) -> np.array:
         try:
@@ -160,14 +162,15 @@ class Detector:
 
 class BlurModel:
     def __init__(self, onnx_model_path):
-
         # Loading the ONNX model
-        onnx_core = Core()
-        model_onnx = onnx_core.read_model(model=onnx_model_path)
-        self.model_onnx = onnx_core.compile_model(model=model_onnx, device_name="CPU")
+        open_vino_core = Core()
+        model_onnx = open_vino_core.read_model(model=onnx_model_path)
+        self.model_onnx = open_vino_core.compile_model(model=model_onnx, device_name="CPU")
         self.infer_request = self.model_onnx.create_infer_request()
+        self.model_output = self.model_onnx.output(0)
+        del model_onnx
 
-    def generate_mask(self, size: tuple, b_box: tuple) -> np.array:
+    def __generate_blur_mask(self, size: Tuple[int, int], b_box: Tuple[float, float, float, float]) -> np.array:
         height, width = size
         y_min, x_min, y_max, x_max = b_box
 
@@ -181,13 +184,11 @@ class BlurModel:
 
     def blur_bounding_box(self, path: str,
                           b_box: Union[Tuple[float, float, float, float], None]) -> None:
-
         with Image.open(path).convert("RGB") as image:
-
-            mask = self.generate_mask(image.size, b_box)
-            image = np.moveaxis(np.asarray(image, dtype=np.float32)/255, 2, 0)[None, :, :]
-            input = np.concatenate((image, mask), axis=1)
-            blured_image = self.infer_request.infer([input])[self.model_onnx.output(0)][0]
-            blured_image = (np.rollaxis(blured_image, 0, 3) * 255).astype(np.uint8)
+            mask = self.__generate_blur_mask(image.size, b_box)
+            image = np.moveaxis(np.asarray(image, dtype=np.float32), 2, 0)[None, :, :]
+            model_input = np.concatenate((image, mask), axis=1)
+            blured_image = self.infer_request.infer([model_input])[self.model_output][0]
+            blured_image = np.moveaxis(blured_image, 0, 2).astype(np.uint8)
             image = Image.fromarray(blured_image)
             image.save(path, "JPEG")

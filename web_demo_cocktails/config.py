@@ -50,7 +50,7 @@ DETECTOR_MODEL_PATH = 'models/detector.onnx'
 
 BLUR_MODEL_PATH = 'models/blur_model.onnx'
 
-BBOX_EXPANSION = 1.05
+BBOX_EXPANSION = 0.85
 
 BBOX_LINE_THICKNESS = 3.0
 

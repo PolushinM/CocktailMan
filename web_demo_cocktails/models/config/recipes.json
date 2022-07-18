@@ -142,6 +142,14 @@
 		"ice"
 	],
 
+	"Bombay_tonic": 
+	[
+		"gin",
+		"tonic",
+		"lime",
+		"ice"
+	],
+
 	"Boston_tea": 
 	[
 		"rum",
@@ -259,13 +267,22 @@
 		"sugar_syr"
 	],
 
-	"Chocolate": 
+	"Chocolate_milkshake": 
 	[
 		"chocolate",
 		"cream",
 		"ice_cream",
 		"milk",
 		"irish_cream"
+	],
+
+	"Chocolate_milkshake_mint": 
+	[
+		"chocolate",
+		"cream",
+		"ice_cream",
+		"milk",
+		"mint"
 	],
 
 	"Coffe_milk": 
@@ -382,7 +399,7 @@
 		"lemon",
 		"ice"
 	],
-
+	
 	"Godfather": 
 	[
 		"whiskey",
@@ -449,6 +466,17 @@
 		"green_liq",
 		"irish_cream",
 		"grenadine"
+	],
+	
+	"Hugo":
+	[
+		"gin",
+		"sparkling_wine",
+		"sprite",
+		"sugar_syr",
+		"mint",
+		"lime",
+		"ice"
 	],
 
 	"Hurricane": 
@@ -636,6 +664,13 @@
 		"tonic",
 		"lime",
 		"ice"
+	],
+	
+	"Melon_ball_shooter":
+	[
+		"orange_juice",
+		"vodka",
+		"green_liq"
 	],
 
 	"Milk": 
@@ -1034,6 +1069,15 @@
 		"cream"
 	],
 	
+	"Strawberry_milkshake_mint": 
+	[
+		"milk",
+		"mint",
+		"ice_cream",
+		"strawberry",
+		"cream"
+	],
+	
 
 	"Strawberry_mojito": 
 	[
@@ -1166,6 +1210,15 @@
 		"ice_cream",
 		"sugar_syr",
 		"cream"
+	],
+	
+	"Vanilla_milkshake_mint":
+	[
+		"milk",
+		"ice_cream",
+		"sugar_syr",
+		"cream",
+		"mint"
 	],
 
 	"Vodka": 

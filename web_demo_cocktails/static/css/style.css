@@ -32,7 +32,9 @@ body {
 #img_cocktail {
   width: auto;
   height: auto;
-  max-height: 500px;
+  min-height: 200px;
+  max-height: 640px;
+  min-width: 60%;
   max-width: 100%;
 }
 

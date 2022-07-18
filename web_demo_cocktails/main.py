@@ -3,13 +3,15 @@ import ssl
 
 import urllib.request
 from werkzeug.utils import secure_filename
+from PIL import Image
 
 from config import (CACHE_FOLDER, DEBUG, CLASSIFIER_CONF_THRESHOLD, MAX_FILE_SIZE, CLASSIFIER_CONFIG_PATH,
                     INGREDIENTS_CONFIG_PATH, CLASSIFIER_MODEL_PATH, REQUEST_HEADERS, DETECTOR_MODEL_PATH,
-                    DETECTOR_CONFIG_PATH, BBOX_EXPANSION, BBOX_LINE_THICKNESS, BBOX_CONF_THRESHOLD, BBOX_LINE_COLOR)
+                    DETECTOR_CONFIG_PATH, BBOX_EXPANSION, BBOX_CONF_THRESHOLD, MAX_MODERATED_SIZE,
+                    BLUR_MODEL_PATH)
 
 from utils import get_random_filename, clear_cache
-from models.models import Classifier, Detector
+from models.models import Classifier, Detector, BlurModel
 
 files_to_delete = []
 
@@ -18,6 +20,8 @@ INGREDIENTS_TEXT = classifier.ingredients_text
 
 detector = Detector(DETECTOR_MODEL_PATH, DETECTOR_CONFIG_PATH)
 detector.bbox_expansion = BBOX_EXPANSION
+
+blur_model = BlurModel(BLUR_MODEL_PATH)
 
 # Allow using unverified SSL for image downloading
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -39,6 +43,20 @@ def generate_recipe(ingredients: list) -> str:
     return recipe
 
 
+def moderate_size(path, max_size):
+    with Image.open(path).convert("RGB") as image:
+        width, height = image.size
+        if (width > max_size) or (height > max_size):
+            if width >= height:
+                w = max_size
+                h = round(max_size * height / width)
+            else:
+                h = max_size
+                w = round(max_size * width / height)
+            image = image.resize((w, h))
+            image.save(path, "JPEG")
+
+
 def predict_ingredients_from_url(image_url: str) -> tuple[str, float, str]:
     clear_cache(files_to_delete)
     filename = secure_filename(get_random_filename())
@@ -57,6 +75,8 @@ def predict_ingredients_from_url(image_url: str) -> tuple[str, float, str]:
     finally:
         file.close()
 
+    moderate_size(full_filename, MAX_MODERATED_SIZE)
+
     recipe, confidence = predict_ingredients(full_filename)
     files_to_delete.append(full_filename)
     return recipe, confidence, filename
@@ -67,6 +87,7 @@ def predict_ingredients_from_file(file):
     filename = secure_filename(get_random_filename())
     full_filename = os.path.join(CACHE_FOLDER, filename)
     file.save(full_filename)
+    moderate_size(full_filename, MAX_MODERATED_SIZE)
     recipe, confidence = predict_ingredients(full_filename)
     files_to_delete.append(full_filename)
     print("files_to_delete: ", files_to_delete)
@@ -77,4 +98,4 @@ def draw_bounding_box(path: str):
     b_box = detector.predict_bbox(path, threshold=BBOX_CONF_THRESHOLD)
     if b_box is not None:
         print("bbox=", b_box)
-        detector.add_bounding_box(path, b_box, thickness=BBOX_LINE_THICKNESS, color=BBOX_LINE_COLOR)
+        blur_model.blur_bounding_box(path, b_box)

@@ -36,6 +36,8 @@ REQUEST_HEADERS = {
                   'Chrome/35.0.1916.47 Safari/537.36 '
 }
 
+MAX_MODERATED_SIZE = 640
+
 CLASSIFIER_CONFIG_PATH = 'models/config/model_classifier.json'
 
 INGREDIENTS_CONFIG_PATH = 'models/config/ingredients.json'
@@ -46,14 +48,16 @@ CLASSIFIER_MODEL_PATH = 'models/classifier.onnx'
 
 DETECTOR_MODEL_PATH = 'models/detector.onnx'
 
+BLUR_MODEL_PATH = 'models/blur_model.onnx'
+
 BBOX_EXPANSION = 1.05
 
 BBOX_LINE_THICKNESS = 3.0
 
 BBOX_LINE_COLOR = "#093993"
 
-BBOX_CONF_THRESHOLD = 0.4
+BBOX_CONF_THRESHOLD = 0.2
 
-CLASSIFIER_CONF_THRESHOLD = 0.3
+CLASSIFIER_CONF_THRESHOLD = 0.35
 
 RANDOM_FILENAME_LENGTH = 10

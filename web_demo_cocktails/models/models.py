@@ -156,3 +156,38 @@ class Detector:
                       width=line_width,
                       joint='curve')
             image.save(path, "JPEG")
+
+
+class BlurModel:
+    def __init__(self, onnx_model_path):
+
+        # Loading the ONNX model
+        onnx_core = Core()
+        model_onnx = onnx_core.read_model(model=onnx_model_path)
+        self.model_onnx = onnx_core.compile_model(model=model_onnx, device_name="CPU")
+        self.infer_request = self.model_onnx.create_infer_request()
+
+    def generate_mask(self, size: tuple, b_box: tuple) -> np.array:
+        height, width = size
+        y_min, x_min, y_max, x_max = b_box
+
+        x_min, x_max = round(x_min * width), round(x_max * width)
+        y_min, y_max = round(y_min * height), round(y_max * height)
+
+        result = np.zeros((1, 1, width, height), dtype=np.float32)
+        result[:, :, x_min: x_max, y_min: y_max] = 1.0
+
+        return result
+
+    def blur_bounding_box(self, path: str,
+                          b_box: Union[Tuple[float, float, float, float], None]) -> None:
+
+        with Image.open(path).convert("RGB") as image:
+
+            mask = self.generate_mask(image.size, b_box)
+            image = np.moveaxis(np.asarray(image, dtype=np.float32)/255, 2, 0)[None, :, :]
+            input = np.concatenate((image, mask), axis=1)
+            blured_image = self.infer_request.infer([input])[self.model_onnx.output(0)][0]
+            blured_image = (np.rollaxis(blured_image, 0, 3) * 255).astype(np.uint8)
+            image = Image.fromarray(blured_image)
+            image.save(path, "JPEG")

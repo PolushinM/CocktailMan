@@ -220,11 +220,13 @@ class BlurModel:
         result[0: x_min, y_max:] = box7
         result[0: x_min, y_min: y_max] = box8
 
-        return result[None, None, :, :] ** 1.5
+        return result[None, None, :, :] ** 2
 
     def blur_bounding_box(self, path: str,
                           b_box: Union[Tuple[float, float, float, float], None]) -> None:
         with Image.open(path).convert("RGB") as image:
+            if (image.size[0] // 2 != 0) or (image.size[1] // 2 != 0):
+                image = image.resize((image.size[0] // 2 * 2, image.size[1] // 2 * 2))
             mask = self.__generate_blur_mask(image.size, b_box)
             image = np.moveaxis(np.asarray(image, dtype=np.float32), 2, 0)[None, :, :]
             model_input = np.concatenate((image, mask), axis=1)

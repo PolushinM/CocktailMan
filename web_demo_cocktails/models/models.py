@@ -7,6 +7,8 @@ from PIL import Image, ImageDraw
 from config import DEBUG
 from utils import clip
 
+from time import time
+
 
 class Classifier:
     def __init__(self, onnx_model_path, model_config_path, ingredients_config_path: str):
@@ -169,68 +171,79 @@ class BlurModel:
         self.infer_request = self.model_onnx.create_infer_request()
         self.model_output = self.model_onnx.output(0)
         del model_onnx
+        self.blur_power = 2.0
 
     def __generate_blur_mask(self, size: Tuple[int, int], b_box: Tuple[float, float, float, float]) -> np.array:
         height, width = size
-        y_min, x_min, y_max, x_max = b_box
+        y_min_r, x_min_r, y_max_r, x_max_r = b_box
 
-        x_min, x_max = round(x_min * width), round(x_max * width)
-        y_min, y_max = round(y_min * height), round(y_max * height)
+        x_min, x_max = round(x_min_r * width), round(x_max_r * width)
+        y_min, y_max = round(y_min_r * height), round(y_max_r * height)
 
-        result = np.zeros((width, height), dtype=np.float32)
+        result = np.ones((width, height), dtype=np.float32)
 
-        x = np.linspace(x_min / width, 0, x_min)
-        y = np.linspace(y_min / height, 0, y_min)
+        x = np.linspace(x_min_r, 0, x_min)
+        y = np.linspace(y_min_r, 0, y_min)
         yv, xv = np.meshgrid(y, x)
-        box1 = (1 / ((xv ** 2 + yv ** 2) ** 0.5 + 1)).astype(np.float32)
+        box_top_left = ((xv ** 2 + yv ** 2) ** 0.5 + 1).astype(np.float32)
 
-        box2 = 1 / (np.full((x_max - x_min, y_min), np.linspace(y_min / height, 0, y_min)) + 1)
+        box_left = np.full((x_max - x_min, y_min), np.linspace(y_min_r + 1, 1, y_min))
 
-        x = np.linspace(0, (width - x_max) / width, width - x_max)
-        y = np.linspace(y_min / height, 0, y_min)
+        x = np.linspace(0, 1 - x_max_r, width - x_max)
+        y = np.linspace(y_min_r, 0, y_min)
         yv, xv = np.meshgrid(y, x)
-        box3 = (1 / ((xv ** 2 + yv ** 2) ** 0.5 + 1)).astype(np.float32)
+        box_bottom_left = ((xv ** 2 + yv ** 2) ** 0.5 + 1).astype(np.float32)
 
-        box4 = 1 / (np.full((y_max - y_min, width - x_max),
-                            np.linspace(0, (width - x_max) / width, width - x_max)) + 1).T
+        box_bottom = np.full((y_max - y_min, width - x_max), np.linspace(1, 2 - x_max_r, width - x_max)).T
 
-        x = np.linspace(0, (width - x_max) / width, width - x_max)
-        y = np.linspace(0, (height - y_max) / height, height - y_max)
+        x = np.linspace(0, 1 - x_max_r, width - x_max)
+        y = np.linspace(0, 1 - y_max_r, height - y_max)
         yv, xv = np.meshgrid(y, x)
-        box5 = (1 / ((xv ** 2 + yv ** 2) ** 0.5 + 1)).astype(np.float32)
+        box_bottom_right = ((xv ** 2 + yv ** 2) ** 0.5 + 1).astype(np.float32)
 
-        box6 = 1 / (np.full((x_max - x_min, height - y_max),
-                            np.linspace(0, (height - y_max) / height, height - y_max)) + 1)
+        box_right = np.full((x_max - x_min, height - y_max), np.linspace(1, 2 - y_max_r, height - y_max))
 
-        x = np.linspace(x_min / width, 0, x_min)
-        y = np.linspace(0, (height - y_max) / height, height - y_max)
+        x = np.linspace(x_min_r, 0, x_min)
+        y = np.linspace(0, 1 - y_max_r, height - y_max)
         yv, xv = np.meshgrid(y, x)
-        box7 = (1 / ((xv ** 2 + yv ** 2) ** 0.5 + 1)).astype(np.float32)
+        box_top_right = ((xv ** 2 + yv ** 2) ** 0.5 + 1).astype(np.float32)
 
-        box8 = 1 / (np.full((y_max - y_min, x_min), np.linspace(x_min / width, 0, x_min)) + 1).T
+        box_top = np.full((y_max - y_min, x_min), np.linspace(x_min_r + 1, 1, x_min)).T
 
-        result[x_min: x_max, y_min: y_max] = 1.0
+        result[: x_min, : y_min] = box_top_left
+        result[x_min: x_max, : y_min] = box_left
+        result[x_max:, : y_min] = box_bottom_left
+        result[x_max:, y_min: y_max] = box_bottom
+        result[x_max:, y_max:] = box_bottom_right
+        result[x_min: x_max, y_max:] = box_right
+        result[: x_min, y_max:] = box_top_right
+        result[: x_min, y_min: y_max] = box_top
 
-        result[0: x_min, 0: y_min] = box1
-        result[x_min: x_max, 0: y_min] = box2
-        result[x_max:, 0: y_min] = box3
-        result[x_max:, y_min: y_max] = box4
-        result[x_max:, y_max:] = box5
-        result[x_min: x_max, y_max:] = box6
-        result[0: x_min, y_max:] = box7
-        result[0: x_min, y_min: y_max] = box8
-
-        return result[None, None, :, :] ** 2
+        return (result ** -self.blur_power)[None, None, :, :]
 
     def blur_bounding_box(self, path: str,
                           b_box: Union[Tuple[float, float, float, float], None]) -> None:
+
         with Image.open(path).convert("RGB") as image:
-            if (image.size[0] // 2 != 0) or (image.size[1] // 2 != 0):
-                image = image.resize((image.size[0] // 2 * 2, image.size[1] // 2 * 2))
+
+            if DEBUG:
+                init_time = time()
+
+            width, height = image.size
+            if (width // 4 != 0) or (height // 4 != 0):
+                '''left = (width - width + 1) / 2 = 0.5
+                top = (height - height + 1) / 2 = 0.5
+                right = (width + width - 1 ) / 2 = width - 0.5
+                bottom = (height + height - 1) / 2 = height - 0.5'''
+                image = image.crop((1, 1, width // 4 * 4 + 1, height // 4 * 4 + 1))
             mask = self.__generate_blur_mask(image.size, b_box)
             image = np.moveaxis(np.asarray(image, dtype=np.float32), 2, 0)[None, :, :]
             model_input = np.concatenate((image, mask), axis=1)
             blured_image = self.infer_request.infer([model_input])[self.model_output][0]
+
+            if DEBUG:
+                print("Blur time=", time() - init_time)
+
             blured_image = np.moveaxis(blured_image, 0, 2).astype(np.uint8)
             image = Image.fromarray(blured_image)
             image.save(path, "JPEG")

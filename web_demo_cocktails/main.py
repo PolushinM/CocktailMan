@@ -7,7 +7,7 @@ from PIL import Image
 
 from config import (CACHE_FOLDER, DEBUG, CLASSIFIER_CONF_THRESHOLD, MAX_FILE_SIZE, CLASSIFIER_CONFIG_PATH,
                     INGREDIENTS_CONFIG_PATH, CLASSIFIER_MODEL_PATH, REQUEST_HEADERS, DETECTOR_MODEL_PATH,
-                    DETECTOR_CONFIG_PATH, BBOX_EXPANSION, BBOX_CONF_THRESHOLD, MAX_MODERATED_SIZE,
+                    DETECTOR_CONFIG_PATH, BBOX_EXPANSION, BBOX_CONF_THRESHOLD, MAX_MODERATED_SIZE, BBOX_BLUR_POWER,
                     BLUR_MODEL_PATH)
 
 from utils import get_random_filename, clear_cache
@@ -22,6 +22,7 @@ detector = Detector(DETECTOR_MODEL_PATH, DETECTOR_CONFIG_PATH)
 detector.bbox_expansion = BBOX_EXPANSION
 
 blur_model = BlurModel(BLUR_MODEL_PATH)
+blur_model.blur_power = BBOX_BLUR_POWER
 
 # Allow using unverified SSL for image downloading
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -94,7 +95,7 @@ def predict_ingredients_from_file(file):
     return recipe, confidence, filename
 
 
-def draw_bounding_box(path: str):
+def blur_bounding_box(path: str):
     b_box = detector.predict_bbox(path, threshold=BBOX_CONF_THRESHOLD)
     if b_box is not None:
         print("bbox=", b_box)

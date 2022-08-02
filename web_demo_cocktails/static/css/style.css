@@ -34,8 +34,9 @@ body {
   height: auto;
   min-height: 200px;
   max-height: 640px;
-  min-width: 60%;
-  max-width: 100%;
+  min-width: 50%;
+  object-fit: contain;
+  border: none;
 }
 
 #github_link {

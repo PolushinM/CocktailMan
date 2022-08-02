@@ -40,5 +40,5 @@ def uri_validator(uri):
         return False
 
 
-def clip(val, min_, max_):
+def clip(val, min_=0, max_=1):
     return min_ if val < min_ else max_ if val > max_ else val

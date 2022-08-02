@@ -1,4 +1,4 @@
 {
- "IMAGE_SIZE": 160,
- "CROP_SIZE": 180
+ "IMAGE_SIZE": 128,
+ "CROP_SIZE": 128
 }

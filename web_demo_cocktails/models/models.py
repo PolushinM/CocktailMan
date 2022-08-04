@@ -14,10 +14,7 @@ class ImageProcessor:
                  ingredients_config_path,
                  detector_model_path,
                  detector_config_path,
-                 detector_bbox_expansion,
                  detector_bbox_conf_threshold,
-                 classification_blur_bbox_expansion,
-                 classification_blur_power,
                  blur_model_path,
                  debug):
 
@@ -34,9 +31,10 @@ class ImageProcessor:
         self.blur_model = BlurModel(onnx_model_path=blur_model_path, debug=debug)
 
         self.debug = debug
-        self.classification_blur_bbox_expansion = classification_blur_bbox_expansion
-        self.detector_bbox_expansion = detector_bbox_expansion
-        self.classification_blur_power = classification_blur_power
+        self.blur_bbox_expansion = self.classifier.blur_bbox_expansion
+        self.detector_bbox_expansion = self.classifier.detector_bbox_expansion
+        self.blur_power = self.classifier.blur_power
+
 
     def predict(self, path: str, threshold: float) -> tuple[list[str], float, tuple[float, float, float, float]]:
 
@@ -56,7 +54,7 @@ class ImageProcessor:
 
         classification_image = self.blur_model.blur_image_array(image=classification_image,
                                                                 blur_bbox=crop_blur_bbox,
-                                                                power=self.classification_blur_power)
+                                                                power=self.blur_power)
 
         ingredients, confidence = self.classifier.classify_image(classification_image, threshold)
 
@@ -102,19 +100,19 @@ class ImageProcessor:
         result_y_max = result_y_max if result_y_max < height else height
 
         crop_blur_bbox_y_min = ((
-                                            y_center_r * height - bbox_height_r * height / 2 * self.classification_blur_bbox_expansion) +
+                                            y_center_r * height - bbox_height_r * height / 2 * self.blur_bbox_expansion) +
                                 result_pad_top - result_y_min) / (result_size * 2)
 
         crop_blur_bbox_x_min = ((
-                                            x_center_r * width - bbox_width_r * width / 2 * self.classification_blur_bbox_expansion) +
+                                            x_center_r * width - bbox_width_r * width / 2 * self.blur_bbox_expansion) +
                                 result_pad_left - result_x_min) / (result_size * 2)
 
         crop_blur_bbox_y_max = ((
-                                            y_center_r * height + bbox_height_r * height / 2 * self.classification_blur_bbox_expansion) +
+                                            y_center_r * height + bbox_height_r * height / 2 * self.blur_bbox_expansion) +
                                 result_pad_top - result_y_min) / (result_size * 2)
 
         crop_blur_bbox_x_max = ((
-                                            x_center_r * width + bbox_width_r * width / 2 * self.classification_blur_bbox_expansion) +
+                                            x_center_r * width + bbox_width_r * width / 2 * self.blur_bbox_expansion) +
                                 result_pad_left - result_x_min) / (result_size * 2)
 
         crop_blur_bbox = crop_blur_bbox_y_min, crop_blur_bbox_x_min, crop_blur_bbox_y_max, crop_blur_bbox_x_max
@@ -170,7 +168,9 @@ class Classifier:
             self.ingredients_text) = self.__import_json_model_config(model_config_path, ingredients_config_path)
 
         self.image_size = model_conf["IMAGE_SIZE"]
-        self.crop_size = model_conf["CROP_SIZE"]
+        self.blur_bbox_expansion = model_conf['BLUR_BBOX_EXPANSION']
+        self.detector_bbox_expansion = model_conf['DETECTOR_BBOX_EXPANSION']
+        self.blur_power = model_conf['BLUR_POWER']
 
         # Loading the ONNX model
         open_vino_ = Core()

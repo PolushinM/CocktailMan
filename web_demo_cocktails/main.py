@@ -8,9 +8,9 @@ from PIL import Image
 
 from config import (CACHE_FOLDER, DEBUG, CLASSIFIER_CONF_THRESHOLD, MAX_FILE_SIZE, CLASSIFIER_CONFIG_PATH,
                     INGREDIENTS_CONFIG_PATH, CLASSIFIER_MODEL_PATH, REQUEST_HEADERS, DETECTOR_MODEL_PATH,
-                    DETECTOR_CONFIG_PATH, CLASSIFICATION_BLUR_BBOX_EXPANSION, DETECTOR_BBOX_CONF_THRESHOLD,
-                    MAX_MODERATED_SIZE, VISUAL_BLUR_POWER, BLUR_MODEL_PATH, DETECTOR_BBOX_EXPANSION,
-                    VISUAL_BLUR_BBOX_EXPANSION, CLASSIFICATION_BLUR_POWER, DRAW_BBOX, BBOX_LINE_THICKNESS,
+                    DETECTOR_CONFIG_PATH, DETECTOR_BBOX_CONF_THRESHOLD,
+                    MAX_MODERATED_SIZE, VISUAL_BLUR_POWER, BLUR_MODEL_PATH,
+                    VISUAL_BLUR_BBOX_EXPANSION, DRAW_BBOX, BBOX_LINE_THICKNESS,
                     BBOX_LINE_COLOR)
 
 from utils import get_random_filename, clear_cache
@@ -23,10 +23,7 @@ image_processor = ImageProcessor(classifier_model_path=CLASSIFIER_MODEL_PATH,
                                  ingredients_config_path=INGREDIENTS_CONFIG_PATH,
                                  detector_model_path=DETECTOR_MODEL_PATH,
                                  detector_config_path=DETECTOR_CONFIG_PATH,
-                                 detector_bbox_expansion=DETECTOR_BBOX_EXPANSION,
                                  detector_bbox_conf_threshold=DETECTOR_BBOX_CONF_THRESHOLD,
-                                 classification_blur_bbox_expansion=CLASSIFICATION_BLUR_BBOX_EXPANSION,
-                                 classification_blur_power=CLASSIFICATION_BLUR_POWER,
                                  blur_model_path=BLUR_MODEL_PATH,
                                  debug=DEBUG)
 

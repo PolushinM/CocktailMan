@@ -4,7 +4,7 @@ let popower_visible = false;
 
 $(function () {
     popover_link.popover({
-    content: ingredients,
+    content: ingredients_list,
     html: true,
     container: '#main_container',
     placement: 'bottom',

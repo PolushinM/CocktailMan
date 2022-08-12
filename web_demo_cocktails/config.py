@@ -70,4 +70,9 @@ DETECTOR_BBOX_CONF_THRESHOLD = 0.1
 
 CLASSIFIER_CONF_THRESHOLD = 0.35
 
+GENERATOR_MODEL_PATH = 'models/generator.onnx'
+
+GENERATOR_CONFIG_PATH = 'models/config/model_generator.json'
+
 RANDOM_FILENAME_LENGTH = 10
+

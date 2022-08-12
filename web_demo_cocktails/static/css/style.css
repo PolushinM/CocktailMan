@@ -40,12 +40,12 @@ body {
   padding-right: 5px;
 }
 
-#make_button {
+.btn-primary {
   background-color: #337ab7;
   border-color: #2e6da4;
 }
 
-#make_button:hover {
+.btn-primary:hover {
   color: #fff;
   background-color: #286090;
   border-color: #204d74;
@@ -78,4 +78,24 @@ body {
 
 #generative_model_link {
   color: #2a6181
+}
+
+.form-check {
+  line-height: 1.45rem;
+  min-height: 0.8rem;
+  max-height: 0.8rem;
+  height: 0.8rem !important;
+}
+
+.form-check-label {
+  max-width: 100%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.col-sm {
+  max-width: 50%;
+  padding-right: 1px;
+  padding-left: 1px;
+  overflow: hidden;
 }

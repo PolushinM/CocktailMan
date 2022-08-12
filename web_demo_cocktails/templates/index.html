@@ -7,13 +7,14 @@
 
   <div id="main_container">
 
-    {%- with messages = get_flashed_messages(with_categories=True) %}{%- if messages %}
-        <div class="row">
-            {% for _, message in messages %}
-                <div class="alert alert-primary text-center" role="alert">{{ message }}</div>
-            {% endfor %}
-        </div>
-    {%- endif %}
+    {%- with messages = get_flashed_messages(with_categories=True) %}
+        {%- if messages %}
+            <div class="row">
+                {% for _, message in messages %}
+                    <div class="alert alert-primary text-center" role="alert">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {%- endif %}
     {%- endwith %}
 
     <p class="h6 text-center">Выбери файл с изображением или вставь ссылку:</p>
@@ -48,13 +49,19 @@
         {%- endif %}
     </div>
 
+    <div class="text-left">
+        <a href="{{ url_for('generative_model') }}" id="generative_model_link">
+          <text class="small">Экспериментальная генеративная модель</text>
+        </a>
+    </div>
+
     <div class="text-end" id="github_link_div">
         <a href="https://github.com/PolushinM/CocktailMan" id="github_link">
             <img src="{{ url_for('static', filename="svg/github.svg") }}"  alt="GitHub: ">
             <text class="small"> PolushinM/CocktailMan</text>
         </a>
-        </div>
     </div>
+  </div>
 {% endblock %}
 
 
@@ -63,7 +70,7 @@
 
   <script src="{{ url_for('static', filename='js/inputFileButton.js') }}" ></script>
 
-  <script> const ingredients = {{ ingr_text | tojson }}.join('<br/>')</script>
+  <script> const ingredients_list = {{ ingr_list | tojson }}.join('<br/>')</script>
   <script src="{{ url_for('static', filename='js/showIngredients.js') }}" ></script>
 
 {% endblock %}

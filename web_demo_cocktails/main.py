@@ -2,16 +2,17 @@ import os
 import ssl
 
 import urllib.request
+from typing import Union
 
+import numpy as np
 from werkzeug.utils import secure_filename
 from PIL import Image
 
 from config import (CACHE_FOLDER, DEBUG, CLASSIFIER_CONF_THRESHOLD, MAX_FILE_SIZE, CLASSIFIER_CONFIG_PATH,
                     INGREDIENTS_CONFIG_PATH, CLASSIFIER_MODEL_PATH, REQUEST_HEADERS, DETECTOR_MODEL_PATH,
-                    DETECTOR_CONFIG_PATH, DETECTOR_BBOX_CONF_THRESHOLD,
-                    MAX_MODERATED_SIZE, VISUAL_BLUR_POWER, BLUR_MODEL_PATH,
-                    VISUAL_BLUR_BBOX_EXPANSION, DRAW_BBOX, BBOX_LINE_THICKNESS,
-                    BBOX_LINE_COLOR)
+                    DETECTOR_CONFIG_PATH, DETECTOR_BBOX_CONF_THRESHOLD, MAX_MODERATED_SIZE, VISUAL_BLUR_POWER,
+                    BLUR_MODEL_PATH, VISUAL_BLUR_BBOX_EXPANSION, DRAW_BBOX, BBOX_LINE_THICKNESS, BBOX_LINE_COLOR,
+                    GENERATOR_MODEL_PATH, GENERATOR_CONFIG_PATH)
 
 from utils import get_random_filename, clear_cache
 from models.models import ImageProcessor
@@ -25,6 +26,8 @@ image_processor = ImageProcessor(classifier_model_path=CLASSIFIER_MODEL_PATH,
                                  detector_config_path=DETECTOR_CONFIG_PATH,
                                  detector_bbox_conf_threshold=DETECTOR_BBOX_CONF_THRESHOLD,
                                  blur_model_path=BLUR_MODEL_PATH,
+                                 generator_model_path=GENERATOR_MODEL_PATH,
+                                 generator_config_path=GENERATOR_CONFIG_PATH,
                                  debug=DEBUG)
 
 INGREDIENTS_TEXT = image_processor.ingredients_text
@@ -42,6 +45,17 @@ def generate_recipe(ingredients: list) -> str:
         else:
             recipe = "".join(["Добавим только ", ingredients[-1], "."])
     return recipe
+
+
+def generate_image(latent: Union[np.array, None], ingr_list):
+    clear_cache(files_to_delete)
+    filename = secure_filename(get_random_filename())
+    full_filename = os.path.join(CACHE_FOLDER, filename)
+    condition = np.zeros(len(INGREDIENTS_TEXT), dtype='float32')
+    condition[ingr_list] = 1.
+    image_processor.generate_to_file(latent, condition, full_filename)
+    files_to_delete.append(full_filename)
+    return filename
 
 
 def moderate_size(path, max_size):

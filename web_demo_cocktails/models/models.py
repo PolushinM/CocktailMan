@@ -16,6 +16,8 @@ class ImageProcessor:
                  detector_config_path,
                  detector_bbox_conf_threshold,
                  blur_model_path,
+                 generator_model_path,
+                 generator_config_path,
                  debug):
 
         self.classifier = Classifier(onnx_model_path=classifier_model_path,
@@ -28,13 +30,17 @@ class ImageProcessor:
                                  bbox_conf_threshold=detector_bbox_conf_threshold,
                                  debug=debug)
 
-        self.blur_model = BlurModel(onnx_model_path=blur_model_path, debug=debug)
+        self.blur_model = BlurModel(onnx_model_path=blur_model_path,
+                                    debug=debug)
+
+        self.generator = Generator(onnx_model_path=generator_model_path,
+                                   model_config_path=generator_config_path,
+                                   debug=False)
 
         self.debug = debug
         self.blur_bbox_expansion = self.classifier.blur_bbox_expansion
         self.detector_bbox_expansion = self.classifier.detector_bbox_expansion
         self.blur_power = self.classifier.blur_power
-
 
     def predict(self, path: str, threshold: float) -> tuple[list[str], float, tuple[float, float, float, float]]:
 
@@ -71,6 +77,13 @@ class ImageProcessor:
         if bbox is not None:
             self.blur_model.blur_image_file(path=path, b_box=bbox, power=power, expansion=expansion)
 
+    def generate_to_file(self, latent: Union[np.array, None], condition: np.array, path: str) -> None:
+        image_array = self.generator.generate_image_array(latent, condition) * 255
+        image_array = np.moveaxis(image_array, 0, 2).astype(np.uint8)
+        image_file = Image.fromarray(image_array)
+        image_file.save(path, "JPEG", quality=100, subsampling=0)
+        return
+
     def __get_crop_coordinates(self, bbox: tuple, image_size: tuple) -> tuple:
 
         width, height = image_size
@@ -99,20 +112,16 @@ class ImageProcessor:
         result_pad_bottom = result_y_max - height if result_y_max > height else 0
         result_y_max = result_y_max if result_y_max < height else height
 
-        crop_blur_bbox_y_min = ((
-                                            y_center_r * height - bbox_height_r * height / 2 * self.blur_bbox_expansion) +
+        crop_blur_bbox_y_min = ((y_center_r * height - bbox_height_r * height / 2 * self.blur_bbox_expansion) +
                                 result_pad_top - result_y_min) / (result_size * 2)
 
-        crop_blur_bbox_x_min = ((
-                                            x_center_r * width - bbox_width_r * width / 2 * self.blur_bbox_expansion) +
+        crop_blur_bbox_x_min = ((x_center_r * width - bbox_width_r * width / 2 * self.blur_bbox_expansion) +
                                 result_pad_left - result_x_min) / (result_size * 2)
 
-        crop_blur_bbox_y_max = ((
-                                            y_center_r * height + bbox_height_r * height / 2 * self.blur_bbox_expansion) +
+        crop_blur_bbox_y_max = ((y_center_r * height + bbox_height_r * height / 2 * self.blur_bbox_expansion) +
                                 result_pad_top - result_y_min) / (result_size * 2)
 
-        crop_blur_bbox_x_max = ((
-                                            x_center_r * width + bbox_width_r * width / 2 * self.blur_bbox_expansion) +
+        crop_blur_bbox_x_max = ((x_center_r * width + bbox_width_r * width / 2 * self.blur_bbox_expansion) +
                                 result_pad_left - result_x_min) / (result_size * 2)
 
         crop_blur_bbox = crop_blur_bbox_y_min, crop_blur_bbox_x_min, crop_blur_bbox_y_max, crop_blur_bbox_x_max
@@ -164,8 +173,8 @@ class Classifier:
         self.debug = debug
         # Loading JSON config
         (model_conf,
-            self.class_labels_ru,
-            self.ingredients_text) = self.__import_json_model_config(model_config_path, ingredients_config_path)
+         self.class_labels_ru,
+         self.ingredients_text) = self.__import_json_model_config(model_config_path, ingredients_config_path)
 
         self.image_size = model_conf["IMAGE_SIZE"]
         self.blur_bbox_expansion = model_conf['BLUR_BBOX_EXPANSION']
@@ -173,10 +182,11 @@ class Classifier:
         self.blur_power = model_conf['BLUR_POWER']
 
         # Loading the ONNX model
-        open_vino_ = Core()
-        model_onnx = open_vino_.read_model(model=onnx_model_path)
-        self.model_onnx = open_vino_.compile_model(model=model_onnx, device_name="CPU")
+        open_vino_core = Core()
+        model_onnx = open_vino_core.read_model(model=onnx_model_path)
+        self.model_onnx = open_vino_core.compile_model(model=model_onnx, device_name="CPU")
         del model_onnx
+        del open_vino_core
 
     def classify_image(self, image: np.array, threshold: float):
         logits = self.model_onnx([image[None, :, :, :]])[self.model_onnx.output(0)][0]
@@ -226,6 +236,7 @@ class Detector:
         self.detector_onnx = open_vino_core.compile_model(model=model_onnx, device_name="CPU")
         self.infer_request = self.detector_onnx.create_infer_request()
         del model_onnx
+        del open_vino_core
 
     def predict_bbox(self, image: np.array) -> Union[Tuple[float, float, float, float], None]:
 
@@ -294,6 +305,7 @@ class BlurModel:
         self.model_output = self.model_onnx.output(0)
         self.blur_request = self.model_onnx.create_infer_request()
         del model_onnx
+        del open_vino_core
 
     def blur_image_array(self, image: np.array, blur_bbox: tuple, power: float) -> np.array:
         mask = self.__generate_blur_mask((image.shape[1], image.shape[2]), blur_bbox, power=power)
@@ -386,3 +398,31 @@ class BlurModel:
 
             image = Image.fromarray(blured_image)
             image.save(path, "JPEG", quality=100, subsampling=0)
+
+
+class Generator:
+    def __init__(self, onnx_model_path, model_config_path, debug=False):
+        # Loading JSON config
+        with open(model_config_path, 'r', encoding="utf-8") as file:
+            model_config = json.load(file)
+        self.image_size = model_config['IMAGE_SIZE']
+        self.latent_size = model_config['LATENT_SIZE']
+        self.debug = debug
+
+        # Loading the ONNX model
+        open_vino_core = Core()
+        model_onnx = open_vino_core.read_model(model=onnx_model_path)
+        self.generator_onnx = open_vino_core.compile_model(model=model_onnx, device_name="CPU")
+        self.infer_request = self.generator_onnx.create_infer_request()
+        self.model_output = self.generator_onnx.output(0)
+        del model_onnx
+
+    def generate_image_array(self, latent: Union[np.array, None], condition: np.array) -> np.array:
+
+        if latent is None:
+            latent = np.random.normal(0, 0.5, self.latent_size)
+
+        inputs = np.concatenate((latent.astype('float32'), condition.astype('float32')), axis=0)[None, :]
+        output = self.infer_request.infer([inputs])[self.model_output][0] #* 1.3 - 0.15
+
+        return np.clip(output, a_max=1., a_min=0.)

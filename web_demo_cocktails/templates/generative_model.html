@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+{%- extends "base.html" %}
+
+{% block content %}
+
+  <div id="main_container">
+
+    {%- with messages = get_flashed_messages(with_categories=True) %}
+        {%- if messages %}
+            <div class="row">
+                {% for _, message in messages %}
+                    <div class="alert alert-primary text-center" role="alert">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {%- endif %}
+    {%- endwith %}
+
+    <h1 class="text-center">CocktailMan</h1>
+
+    <p class="h4 text-center">Выбери ингредиенты для коктейля:</p>
+    <form class="form-inline center-block" action="/generative_model" method="POST" enctype="multipart/form-data" id="ingredients_form">
+      {# Add ingredients switches by script #}
+
+      {%- if ingr_list %}
+          <div class="row text-left">
+              <div class="col-sm">
+                  {% for i in range(0, ingr_list|length, 2) %}
+                      <div class="form-check form-switch">
+                          <input class="form-check-input small" type="checkbox" role="switch" name="{{ i }}">
+                          <label class="form-check-label small" for="ingredients_form" id="ingr_switch_{{ i }}">{{ ingr_list[i] }}</label>
+                      </div>
+                  {% endfor %}
+              </div>
+
+              <div class="col-sm">
+                  {% for i in range(1, ingr_list|length, 2) %}
+                      <div class="form-check form-switch">
+                          <input class="form-check-input small" type="checkbox" role="switch" name="{{ i }}">
+                          <label class="form-check-label small" for="ingredients_form" id="ingr_switch_{{ i }}">{{ ingr_list[i] }}</label>
+                      </div>
+                  {% endfor %}
+              </div>
+          </div>
+      {%- endif %}
+    <div class="text-center">
+        <button type="submit" class="btn btn-primary">Нарисовать!</button>
+    </div>
+
+    </form>
+
+    <div class="text-center">
+        {%- if '.jpg' in image_filename %}
+          <img src="{{ url_for('download_file', filename=image_filename) }}" id="img_cocktail" class="img-thumbnail" alt="Коктейль не загрузился">
+        {% else %}
+          <img src="{{ url_for('static', filename="placeholder.jpg") }}" id="img_cocktail" class="img-thumbnail" alt="Коктейль не загрузился">
+        {%- endif %}
+    </div>
+
+    <div class="text-left">
+        <a href="{{ url_for('index') }}" id="generative_model_link">
+          <text class="small"><- Назад к классификатору</text>
+        </a>
+    </div>
+
+    <div class="text-end" id="github_link_div">
+        <a href="https://github.com/PolushinM/CocktailMan" id="github_link">
+            <img src="{{ url_for('static', filename="svg/github.svg") }}"  alt="GitHub: ">
+            <text class="small"> PolushinM/CocktailMan</text>
+        </a>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+
+{#    <script>const ingredients_list = {{ ingr_list | tojson }};</script>#}
+{##}
+{#    <script>#}
+{##}
+{##}
+{#    function getIngrTag(text, id) {#}
+{#        let inr_tag = $('<div>').addClass('form-check').addClass('form-switch');#}
+{#        inr_tag.append($('<input>').addClass('form-check-input').attr('type', 'checkbox').attr('role', 'switch').attr('id', id));#}
+{#        inr_tag.append($('<label>').addClass('form-check-label').attr('for', 'flexSwitchCheckDefault').text(text));#}
+{#        return inr_tag;#}
+{#    }#}
+{##}
+{#    $(function() {#}
+{#        for (let i in ingredients_list) {#}
+{#            $("#ingredients_form").append(getIngrTag(ingredients_list[i], "ingr" + i));#}
+            {#$( document ).trigger( "ready" );#}
+{#        }#}
+{#    })#}
+{##}
+{#    </script>#}
+
+{% endblock %}

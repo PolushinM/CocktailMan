@@ -19,8 +19,7 @@ def index():
 
     form = UploadForm()
 
-    file_exist = form.validate_on_submit() and request.files['input_file'].filename and len(
-        request.form['image_url']) > 0
+    file_exist = form.validate_on_submit() and request.files['input_file'].filename
     url_exist = 'image_url' in request.form and uri_validator(request.form['image_url'])
 
     if request.method == "POST":

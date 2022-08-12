@@ -3,52 +3,58 @@
 
 {% block content %}
 
-  <div class="jumbotron; text-center" id="main_container">
-    {%- with messages = get_flashed_messages(with_categories=True) %}
-    {%- if messages %}
-      <div class="row">
-        <div class="col-md-12">
-          {{utils.flashed_messages(messages, container=False)}}
+  <h1 class="text-center">CocktailMan</h1>
+
+  <div id="main_container">
+
+    {%- with messages = get_flashed_messages(with_categories=True) %}{%- if messages %}
+        <div class="row">
+            {% for _, message in messages %}
+                <div class="alert alert-primary text-center" role="alert">{{ message }}</div>
+            {% endfor %}
         </div>
-      </div>
     {%- endif %}
     {%- endwith %}
 
-    <h1>CocktailMan</h1>
-    <p class="h4">Выбери файл с изображением или вставь ссылку:</p>
-    <form class="form-inline center-block" action="/" method="POST" enctype="multipart/form-data">
-      {{ form.hidden_tag() }}
-      <div class="input-group">
-          <label id="browsebutton" class="btn btn-default input-group-addon" >
-              {{ form.input_file(id="file-selector") }}
-              Открыть...
-          </label>
-          <label for="input_url"></label><input type="text" id="input_url" name="image_url" class="form-control" placeholder="Ссылка на изображение">
-      </div>
-      {{ form.submit(class_="btn btn-primary") }}
+    <p class="h6 text-center">Выбери файл с изображением или вставь ссылку:</p>
+    <form class="text-center" action="/" method="POST" enctype="multipart/form-data">
+        <div class="form-group row">
+            {{ form.hidden_tag() }}
+            <div class="input-group col" id="input_url_div">
+                <label id="browsebutton" class="btn btn-outline-light" >
+                    {{ form.input_file(id="file-selector") }}
+                    Открыть...
+                </label>
+                <label for="input_url"></label>
+                <input type="text" id="input_url" name="image_url" class="form-control" placeholder="Ссылка на изображение">
+            </div>
+            <div class="col-sm-auto" id="make_button_div">
+                {{ form.submit(class_="btn btn-primary", id="make_button") }}
+            </div>
+        </div>
     </form>
 
-    <div class="text-right">
-        <text class="h5" id="ingr_list" tabindex="0" data-toggle="ingr_popover">Доступные ингредиенты</text>
+    <div class="text-end mt-1 mb-2">
+        <text class="small" id="ingr_list" data-toggle="ingr_popover" data-bs-content="Bottom popover" data-popper-placement="bottom">Доступные ингредиенты</text>
     </div>
 
-    <p class="h4">{{ recipe }}</p>
-    <p class="h4">{{ conf_text }}</p>
-    {%- if '.jpg' in image_filename %}
-      <img src="{{ url_for('download_file', filename=image_filename) }}" id="img_cocktail" class="img-thumbnail" alt="Коктейль не загрузился">
-    {% else %}
-      <img src="{{ url_for('static', filename="placeholder.jpg") }}" id="img_cocktail" class="img-thumbnail" alt="Коктейль не загрузился">
-    {%- endif %}
-  </div>
+    <div class="text-center">
+        <p class="h6">{{ recipe }}</p>
+        <p class="h6">{{ conf_text }}</p>
+        {%- if '.jpg' in image_filename %}
+            <img src="{{ url_for('download_file', filename=image_filename) }}" id="img_cocktail" class="img-thumbnail" alt="Коктейль не загрузился">
+        {% else %}
+            <img src="{{ url_for('static', filename="placeholder.jpg") }}" id="img_cocktail" class="img-thumbnail" alt="Коктейль не загрузился">
+        {%- endif %}
+    </div>
 
-  <div class="text-right">
-      <br>
-      <a href="https://github.com/PolushinM/CocktailMan" id="github_link">
-        <img src="{{ url_for('static', filename="svg/github.svg") }}"  alt="GitHub: ">
-        <text> PolushinM/CocktailMan</text>
-      </a>
-  </div>
-
+    <div class="text-end" id="github_link_div">
+        <a href="https://github.com/PolushinM/CocktailMan" id="github_link">
+            <img src="{{ url_for('static', filename="svg/github.svg") }}"  alt="GitHub: ">
+            <text class="small"> PolushinM/CocktailMan</text>
+        </a>
+        </div>
+    </div>
 {% endblock %}
 
 

@@ -6,11 +6,11 @@ from typing import Union
 
 import numpy as np
 from werkzeug.utils import secure_filename
-from PIL import Image
 
-from config import (CACHE_FOLDER, DEBUG, CLASSIFIER_CONF_THRESHOLD, MAX_FILE_SIZE, CLASSIFIER_CONFIG_PATH,
+
+from config import (CACHE_FOLDER, DEBUG, CLASSIFIER_CONF_THRESHOLD, MAX_IMAGE_FILE_SIZE, CLASSIFIER_CONFIG_PATH,
                     INGREDIENTS_CONFIG_PATH, CLASSIFIER_MODEL_PATH, REQUEST_HEADERS, DETECTOR_MODEL_PATH,
-                    DETECTOR_CONFIG_PATH, DETECTOR_BBOX_CONF_THRESHOLD, MAX_MODERATED_SIZE, VISUAL_BLUR_POWER,
+                    DETECTOR_CONFIG_PATH, DETECTOR_BBOX_CONF_THRESHOLD, MAX_IMAGE_MODERATED_SIZE, VISUAL_BLUR_POWER,
                     BLUR_MODEL_PATH, VISUAL_BLUR_BBOX_EXPANSION, DRAW_BBOX, BBOX_LINE_THICKNESS, BBOX_LINE_COLOR,
                     GENERATOR_MODEL_PATH, GENERATOR_CONFIG_PATH)
 
@@ -19,7 +19,8 @@ from models.models import ImageProcessor
 
 files_to_delete = []
 
-image_processor = ImageProcessor(classifier_model_path=CLASSIFIER_MODEL_PATH,
+image_processor = ImageProcessor(max_moderated_size=MAX_IMAGE_MODERATED_SIZE,
+                                 classifier_model_path=CLASSIFIER_MODEL_PATH,
                                  classifier_config_path=CLASSIFIER_CONFIG_PATH,
                                  ingredients_config_path=INGREDIENTS_CONFIG_PATH,
                                  detector_model_path=DETECTOR_MODEL_PATH,
@@ -36,7 +37,7 @@ INGREDIENTS_TEXT = image_processor.ingredients_text
 ssl._create_default_https_context = ssl._create_unverified_context
 
 
-def generate_recipe(ingredients: list) -> str:
+def generate_recipe(ingredients: list[str]) -> str:
     recipe = "Не могу найти напиток на изображении."
     if len(ingredients) > 0:
         if len(ingredients) > 1:
@@ -47,7 +48,7 @@ def generate_recipe(ingredients: list) -> str:
     return recipe
 
 
-def generate_image(latent: Union[np.array, None], ingr_list):
+def generate_image(latent: Union[np.ndarray, None], ingr_list) -> str:
     clear_cache(files_to_delete)
     filename = secure_filename(get_random_filename())
     full_filename = os.path.join(CACHE_FOLDER, filename)
@@ -56,20 +57,6 @@ def generate_image(latent: Union[np.array, None], ingr_list):
     image_processor.generate_to_file(latent, condition, full_filename)
     files_to_delete.append(full_filename)
     return filename
-
-
-def moderate_size(path, max_size):
-    with Image.open(path).convert("RGB") as image:
-        width, height = image.size
-        if (width > max_size) or (height > max_size):
-            if width >= height:
-                w = max_size
-                h = round(max_size * height / width)
-            else:
-                h = max_size
-                w = round(max_size * width / height)
-            image = image.resize((w, h))
-            image.save(path, "JPEG")
 
 
 def predict(src, src_type: str) -> tuple[str, float, tuple[float, float, float, float], str]:
@@ -81,7 +68,7 @@ def predict(src, src_type: str) -> tuple[str, float, tuple[float, float, float, 
         req = urllib.request.Request(src, data=None, headers=REQUEST_HEADERS)
         file = open(full_filename, "wb")
         try:
-            file.write(urllib.request.urlopen(req).read(MAX_FILE_SIZE))
+            file.write(urllib.request.urlopen(req).read(MAX_IMAGE_FILE_SIZE))
         except Exception as e_urllib:
             if DEBUG:
                 print("urllib", e_urllib)
@@ -90,23 +77,21 @@ def predict(src, src_type: str) -> tuple[str, float, tuple[float, float, float, 
     if src_type == "file":
         src.save(full_filename)
 
-    moderate_size(full_filename, MAX_MODERATED_SIZE)
-
-    ingredients, confidence, bbox = image_processor.predict(path=full_filename, threshold=CLASSIFIER_CONF_THRESHOLD)
+    ingredients, confidence, b_box = image_processor.predict(path=full_filename, threshold=CLASSIFIER_CONF_THRESHOLD)
 
     files_to_delete.append(full_filename)
 
-    return generate_recipe(ingredients), confidence, bbox, filename
+    return generate_recipe(ingredients), confidence, b_box, filename
 
 
-def blur_bounding_box(path: str, bbox: tuple[float, float, float, float]):
+def blur_bounding_box(path: str, b_box: tuple[float, float, float, float]):
     image_processor.blur_bounding_box(path=path,
-                                      bbox=bbox,
+                                      b_box=b_box,
                                       power=VISUAL_BLUR_POWER,
                                       expansion=VISUAL_BLUR_BBOX_EXPANSION)
 
     if (DRAW_BBOX == "True") or (DRAW_BBOX == "Debug" and DEBUG):
-        image_processor.detector.draw_bounding_box(path=path,
-                                                   b_box=bbox,
-                                                   thickness=BBOX_LINE_THICKNESS,
-                                                   color=BBOX_LINE_COLOR)
+        image_processor.draw_bounding_box(path=path,
+                                          b_box=b_box,
+                                          thickness=BBOX_LINE_THICKNESS,
+                                          color=BBOX_LINE_COLOR)

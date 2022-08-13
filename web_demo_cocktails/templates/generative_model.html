@@ -75,25 +75,4 @@
 {% block scripts %}
 {{ super() }}
 
-{#    <script>const ingredients_list = {{ ingr_list | tojson }};</script>#}
-{##}
-{#    <script>#}
-{##}
-{##}
-{#    function getIngrTag(text, id) {#}
-{#        let inr_tag = $('<div>').addClass('form-check').addClass('form-switch');#}
-{#        inr_tag.append($('<input>').addClass('form-check-input').attr('type', 'checkbox').attr('role', 'switch').attr('id', id));#}
-{#        inr_tag.append($('<label>').addClass('form-check-label').attr('for', 'flexSwitchCheckDefault').text(text));#}
-{#        return inr_tag;#}
-{#    }#}
-{##}
-{#    $(function() {#}
-{#        for (let i in ingredients_list) {#}
-{#            $("#ingredients_form").append(getIngrTag(ingredients_list[i], "ingr" + i));#}
-            {#$( document ).trigger( "ready" );#}
-{#        }#}
-{#    })#}
-{##}
-{#    </script>#}
-
 {% endblock %}

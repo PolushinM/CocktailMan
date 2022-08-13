@@ -5,6 +5,46 @@ body {
   margin: 0 auto;
 }
 
+.form-control {
+  border-color: var(--bs-gray-500);
+}
+
+.form-control:valid:focus, .form-control.is-valid:focus {
+  border-color: var(--bs-gray-700);
+  box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0);
+}
+
+.btn-primary {
+  background-color: #337ab7;
+  border-color: #2e6da4;
+}
+
+.btn-primary:hover {
+  color: #fff;
+  background-color: #286090;
+  border-color: #204d74;
+}
+
+.form-check {
+  line-height: 1.45rem;
+  min-height: 0.8rem;
+  max-height: 0.8rem;
+  height: 0.8rem !important;
+}
+
+.form-check-label {
+  max-width: 100%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.col-sm {
+  max-width: 50%;
+  padding-right: 1px;
+  padding-left: 1px;
+  overflow: hidden;
+}
+
 #browsebutton {
   --bs-btn-bg: var(--bs-gray-100);
   --bs-btn-color: var(--bs-gray-800);
@@ -26,29 +66,9 @@ body {
     display: none;
 }
 
-.form-control {
-  border-color: var(--bs-gray-500);
-}
-
-.form-control:valid:focus, .form-control.is-valid:focus {
-  border-color: var(--bs-gray-700);
-  box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0);
-}
-
 #make_button_div {
   padding-left: 2px;
   padding-right: 5px;
-}
-
-.btn-primary {
-  background-color: #337ab7;
-  border-color: #2e6da4;
-}
-
-.btn-primary:hover {
-  color: #fff;
-  background-color: #286090;
-  border-color: #204d74;
 }
 
 #ingr_list {
@@ -78,24 +98,4 @@ body {
 
 #generative_model_link {
   color: #2a6181
-}
-
-.form-check {
-  line-height: 1.45rem;
-  min-height: 0.8rem;
-  max-height: 0.8rem;
-  height: 0.8rem !important;
-}
-
-.form-check-label {
-  max-width: 100%;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-}
-.col-sm {
-  max-width: 50%;
-  padding-right: 1px;
-  padding-left: 1px;
-  overflow: hidden;
 }

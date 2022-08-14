@@ -57,7 +57,7 @@ body {
   --bs-btn-active-border-color: #000;
 }
 
-#input_url_div {
+#input_div {
   padding-left: 5px;
   padding-right: 2px;
 }
@@ -71,7 +71,12 @@ body {
   padding-right: 5px;
 }
 
-#ingr_list {
+.btn-primary {
+  --bs-btn-hover-bg: #337ab7;
+  --bs-btn-focus-box-shadow: none;
+}
+
+#ingredients_list {
   color:#132c3b;
   text-decoration: underline;
   text-decoration-style: dotted;

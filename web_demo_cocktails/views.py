@@ -1,4 +1,5 @@
 import os
+import json
 from flask import render_template, request, flash, send_from_directory
 
 from forms import UploadForm
@@ -11,58 +12,77 @@ import app
 
 app = app.get_app()
 
+input_file = None
+input_file_name = None
+image_url = None
+request_file_name = None
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    recipe = ""
-    confidence = 0.
+    global input_file, request_file_name
+    global input_file_name
+    global image_url
 
     form = UploadForm()
 
+    if request.method == "GET":
+        return render_template('index.html', form=form, ingr_list=INGREDIENTS_TEXT)
+
     if request.method == "POST":
-        file_exist = form.validate_on_submit() and request.files['input_file'].filename
-        url_exist = 'image_url' in request.form and uri_validator(request.form['image_url'])
+
+        input_file = request.files.get('input_file')
+        image_url = request.form.get('image_url')
+
+        url_exist = (image_url is not None) and uri_validator(request.form['image_url'])
+        file_exist = input_file is not None
+
+        if DEBUG:
+            print('file_exist: ', file_exist)
+            print('input_file_name: ', input_file_name)
+            print('input_file: ', input_file)
+            print('url_exist', url_exist)
+            print('image_url', image_url)
+
         if not file_exist and not url_exist:
-            flash("Файл отсутствует")
-            return render_index(form, recipe, confidence)
+            return send_request(message="Файл отсутствует")
+
         if file_exist:
             try:
-                file = request.files['input_file']
-                recipe, confidence, bbox, filename = predict(file, src_type="file")
+                recipe, confidence, bbox, filename = predict(input_file, src_type="file")
+                image_path = os.path.join(CACHE_FOLDER, filename)
                 if bbox[2] * bbox[3] > 0.01:
-                    blur_bounding_box(os.path.join(CACHE_FOLDER, filename), bbox)
-                return render_index(form, recipe, confidence, filename)
+                    blur_bounding_box(image_path, bbox)
+                return send_request(recipe=recipe, confidence=confidence, image_path=image_path)
             except Exception as exception:
-                flash("Не могу прочитать изображение")
                 if DEBUG:
                     print("file_exist_ " + str(exception))
-                return render_index(form, recipe, confidence)
+                return send_request(message="Не могу прочитать изображение")
         if url_exist:
             try:
-                image_url = request.form['image_url']
                 recipe, confidence, bbox, filename = predict(image_url, src_type="url")
+                image_path = os.path.join(CACHE_FOLDER, filename)
                 if bbox[2] * bbox[3] > 0.01:
-                    blur_bounding_box(os.path.join(CACHE_FOLDER, filename), bbox)
-                return render_index(form, recipe, confidence, filename)
+                    blur_bounding_box(image_path, bbox)
+                return send_request(recipe=recipe, confidence=confidence, image_path=image_path)
             except Exception as exception:
-                flash("Не могу прочитать изображение")
                 if DEBUG:
                     print("url_exist_ " + str(exception))
-                return render_index(form, recipe, confidence)
-
-    return render_index(form, recipe, confidence)
+                return send_request(message="Не могу прочитать изображение")
+        return send_request()
 
 
 @app.route('/generative_model', methods=['GET', 'POST'])
 def generative_model():
-    image_filename = ''
+    if request.method == "GET":
+        return render_template('generative_model.html',
+                               ingr_list=INGREDIENTS_TEXT,
+                               image_filename='')
+
     if request.method == "POST":
         ingr_list = [int(item) for item in request.form]
-        image_filename = generate_image(latent=None, ingr_list=ingr_list)
-
-    return render_template('generative_model.html',
-                           ingr_list=INGREDIENTS_TEXT,
-                           image_filename=image_filename)
+        image_path = generate_image(latent=None, ingr_list=ingr_list)
+        return json.dumps({'image_path': image_path})
 
 
 @app.route('/cache/<path:filename>')
@@ -70,11 +90,14 @@ def download_file(filename):
     return send_from_directory(CACHE_FOLDER, filename, as_attachment=True)
 
 
-def render_index(form, recipe, confidence, image_filename="placeholder"):
-    template = render_template('index.html',
-                               form=form,
-                               recipe=recipe,
-                               ingr_list=INGREDIENTS_TEXT,
-                               conf_text=get_confidence_text(confidence),
-                               image_filename=image_filename)
-    return template
+def send_request(recipe="",
+                 confidence=0.,
+                 image_path=os.path.join("static/", "placeholder.jpg"),
+                 message: str = ""
+                 ) -> str:
+    result = json.dumps({'image_path': image_path,
+                         'flash_message': message,
+                         'recipe': recipe,
+                         'confidence': get_confidence_text(confidence)
+                         })
+    return result

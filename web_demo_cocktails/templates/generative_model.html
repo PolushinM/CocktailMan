@@ -18,11 +18,10 @@
     <h1 class="text-center">CocktailMan</h1>
 
     <p class="h4 text-center">Выбери ингредиенты для коктейля:</p>
-    <form class="form-inline center-block" action="/generative_model" method="POST" enctype="multipart/form-data" id="ingredients_form">
-      {# Add ingredients switches by script #}
+    <form class="form-inline center-block" action="/generative_model" method="POST" enctype="multipart/form-data" id="ingredients_form" name="ingredients_form">
 
       {%- if ingr_list %}
-          <div class="row text-left">
+          <div class="row text-left" id="ingr_div">
               <div class="col-sm">
                   {% for i in range(0, ingr_list|length, 2) %}
                       <div class="form-check form-switch">
@@ -42,9 +41,9 @@
               </div>
           </div>
       {%- endif %}
-    <div class="text-center">
-        <button type="submit" class="btn btn-primary">Нарисовать!</button>
-    </div>
+        <div class="text-center">
+            <button type="button" class="btn btn-primary" onclick=generate_image()>Нарисовать!</button>
+        </div>
 
     </form>
 
@@ -74,5 +73,7 @@
 
 {% block scripts %}
 {{ super() }}
+
+<script src="{{ url_for('static', filename='js/generativeModelAjax.js') }}" ></script>
 
 {% endblock %}

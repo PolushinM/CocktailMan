@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 {%- extends "base.html" %}
 
 {% block content %}
@@ -7,21 +8,11 @@
 
   <div id="main_container">
 
-    {%- with messages = get_flashed_messages(with_categories=True) %}
-        {%- if messages %}
-            <div class="row">
-                {% for _, message in messages %}
-                    <div class="alert alert-primary text-center" role="alert">{{ message }}</div>
-                {% endfor %}
-            </div>
-        {%- endif %}
-    {%- endwith %}
-
     <p class="h6 text-center">Выбери файл с изображением или вставь ссылку:</p>
-    <form class="text-center" action="/" method="POST" enctype="multipart/form-data">
+    <form class="text-center" action="/" method="POST" enctype="multipart/form-data" name="input_form" id="input_form">
         <div class="form-group row">
             {{ form.hidden_tag() }}
-            <div class="input-group col" id="input_url_div">
+            <div class="input-group col" id="input_div">
                 <label id="browsebutton" class="btn btn-outline-light" >
                     {{ form.input_file(id="file-selector") }}
                     Открыть...
@@ -36,22 +27,21 @@
     </form>
 
     <div class="text-end mt-1 mb-2">
-        <text class="small" id="ingr_list" data-toggle="ingr_popover" data-bs-content="Bottom popover" data-popper-placement="bottom">Доступные ингредиенты</text>
+        <text class="small" id="ingredients_list" data-toggle="ingr_popover" data-bs-content="Bottom popover" data-popper-placement="bottom">Доступные ингредиенты</text>
     </div>
 
     <div class="text-center">
-        <p class="h6">{{ recipe }}</p>
-        <p class="h6">{{ conf_text }}</p>
-        {%- if '.jpg' in image_filename %}
-            <img src="{{ url_for('download_file', filename=image_filename) }}" id="img_cocktail" class="img-thumbnail" alt="Коктейль не загрузился">
-        {% else %}
-            <img src="{{ url_for('static', filename="placeholder.jpg") }}" id="img_cocktail" class="img-thumbnail" alt="Коктейль не загрузился">
-        {%- endif %}
+        <p class="h6" id="recipe"></p>
+        <p class="h6" id="confidence"></p>
+        <div id="flash_div"></div>
+        <img src="{{ url_for('static', filename="placeholder.jpg") }}" id="img_cocktail" class="img-thumbnail" alt="Коктейль не загрузился">
     </div>
+
+
 
     <div class="text-left">
         <a href="{{ url_for('generative_model') }}" id="generative_model_link">
-          <text class="small">Экспериментальная генеративная модель</text>
+          <text class="small">Экспериментальная генеративная модель (В разработке!)</text>
         </a>
     </div>
 
@@ -62,15 +52,25 @@
         </a>
     </div>
   </div>
+
+    <template id='flash_message_template'>
+      <div class="alert alert-primary alert-dismissible fade show text-center" role="alert" id="flash_message">
+        <span class="flash_message_text"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    </template>
+
 {% endblock %}
+
 
 
 {% block scripts %}
 {{ super() }}
 
-  <script src="{{ url_for('static', filename='js/inputFileButton.js') }}" ></script>
+    <script src="{{ url_for('static', filename='js/indexMain.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/inputFileButton.js') }}" ></script>
 
-  <script> const ingredients_list = {{ ingr_list | tojson }}.join('<br/>')</script>
-  <script src="{{ url_for('static', filename='js/showIngredients.js') }}" ></script>
+    <script> const ingredients_list = {{ ingr_list | tojson }}.join('<br/>')</script>
+    <script src="{{ url_for('static', filename='js/showIngredients.js') }}"></script>
 
 {% endblock %}

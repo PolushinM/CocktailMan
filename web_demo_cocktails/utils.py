@@ -34,6 +34,7 @@ def get_confidence_text(confidence: float) -> str:
 
 def uri_validator(uri):
     try:
+        assert len(uri) > 0
         result = urlparse(uri)
         return all([result.scheme, result.netloc])
     except Exception:

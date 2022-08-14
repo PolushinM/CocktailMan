@@ -43,7 +43,6 @@ class ImageProcessor:
         self.blur_bbox_expansion = self.classifier.blur_bbox_expansion
         self.detector_bbox_expansion = self.classifier.detector_bbox_expansion
         self.blur_power = self.classifier.blur_power
-        return
 
     def predict(self, path: str, threshold: float) -> tuple[list[str], float, tuple[float, float, float, float]]:
 
@@ -67,12 +66,13 @@ class ImageProcessor:
 
         ingredients, confidence = self.classifier.classify_image(classification_image, threshold)
 
-        if self.debug:  # TODO: remove this
-            classification_image = Image.fromarray(np.uint8(np.moveaxis(classification_image * 127.5 + 127.5, 0, 2)),
-                                                   mode="RGB")
+        if self.debug:
+            classification_image = Image.fromarray(
+                np.uint8(np.moveaxis(classification_image * 127.5 + 127.5, 0, 2)), mode="RGB")
+
             classification_image.save(
-                "/home/maksim/gitrepo/CocktailMan/web_demo_cocktails/cache/classification_image.jpg", "JPEG",
-                quality=100, subsampling=0)
+                "/home/maksim/gitrepo/CocktailMan/web_demo_cocktails/cache/classification_image.jpg",
+                "JPEG", quality=100, subsampling=0)
 
         return ingredients, confidence, b_box
 
@@ -82,10 +82,6 @@ class ImageProcessor:
 
                 width, height = image.size
                 if width % 4 != 0:
-                    '''left = (width - width + 1) / 2 = 0.5
-                    top = (height - height + 1) / 2 = 0.5
-                    right = (width + width - 1 ) / 2 = width - 0.5
-                    bottom = (height + height - 1) / 2 = height - 0.5'''
                     image = image.crop((1, 0, width // 4 * 4 + 1, height))
                 width, height = image.size
                 if height % 4 != 0:
@@ -97,12 +93,10 @@ class ImageProcessor:
                                                           power=power,
                                                           expansion=expansion)
                 self.__save_image(blured_image, path)
-            return
 
     def generate_to_file(self, latent: Union[np.ndarray, None], condition: np.ndarray, path: str) -> None:
         image_array = self.generator.generate_image_array(latent, condition) * 255
         self.__save_image(image_array, path)
-        return
 
     def __open_image(self, path: str) -> Union[Image.Image, None]:
         try:
@@ -131,7 +125,6 @@ class ImageProcessor:
             image.save(path, "JPEG", quality=100, subsampling=0)
         else:
             raise ValueError("Argument 'image' must be numpy array or PIL Image")
-        return
 
     def draw_bounding_box(self, path: str,
                           b_box: Union[tuple[float, float, float, float], None],
@@ -159,7 +152,6 @@ class ImageProcessor:
                   joint='curve')
         # image.save(path, "JPEG")
         self.__save_image(image, path)
-        return
 
     def __get_crop_coordinates(self, b_box: tuple[float, float, float, float], image_size: tuple[int, int]) -> tuple[
             tuple[int, int, int, int, int, int, int, int], tuple[float, float, float, float]]:
@@ -256,7 +248,6 @@ class Classifier:
         self.model_onnx = open_vino_core.compile_model(model=model_onnx, device_name="CPU")
         del model_onnx
         del open_vino_core
-        return
 
     def classify_image(self, image: np.ndarray, threshold: float):
         logits = self.model_onnx([image[None, :, :, :]])[self.model_onnx.output(0)][0]
@@ -308,7 +299,6 @@ class Detector:
         self.infer_request = self.detector_onnx.create_infer_request()
         del model_onnx
         del open_vino_core
-        return
 
     def predict_bbox(self, image: np.ndarray) -> Union[tuple[float, float, float, float], None]:
 
@@ -353,7 +343,6 @@ class BlurModel:
         self.blur_request = self.model_onnx.create_infer_request()
         del model_onnx
         del open_vino_core
-        return
 
     def __generate_blur_mask(self, size: tuple[int, int],
                              b_box: tuple[float, float, float, float],
@@ -438,7 +427,6 @@ class Generator:
         self.infer_request = self.generator_onnx.create_infer_request()
         self.model_output = self.generator_onnx.output(0)
         del model_onnx
-        return
 
     def generate_image_array(self, latent: Union[np.ndarray, None], condition: np.ndarray) -> np.ndarray:
         if latent is None:

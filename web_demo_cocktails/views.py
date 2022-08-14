@@ -1,6 +1,6 @@
 import os
 import json
-from flask import render_template, request, flash, send_from_directory
+from flask import render_template, request, send_from_directory
 
 from forms import UploadForm
 
@@ -12,17 +12,9 @@ import app
 
 app = app.get_app()
 
-input_file = None
-input_file_name = None
-image_url = None
-request_file_name = None
-
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    global input_file, request_file_name
-    global input_file_name
-    global image_url
 
     form = UploadForm()
 
@@ -36,13 +28,6 @@ def index():
 
         url_exist = (image_url is not None) and uri_validator(request.form['image_url'])
         file_exist = input_file is not None
-
-        if DEBUG:
-            print('file_exist: ', file_exist)
-            print('input_file_name: ', input_file_name)
-            print('input_file: ', input_file)
-            print('url_exist', url_exist)
-            print('image_url', image_url)
 
         if not file_exist and not url_exist:
             return send_request(message="Файл отсутствует")

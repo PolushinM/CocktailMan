@@ -8,11 +8,12 @@ import numpy as np
 from werkzeug.utils import secure_filename
 
 
-from config import (CACHE_FOLDER, DEBUG, CLASSIFIER_CONF_THRESHOLD, MAX_IMAGE_FILE_SIZE, CLASSIFIER_CONFIG_PATH,
-                    INGREDIENTS_CONFIG_PATH, CLASSIFIER_MODEL_PATH, REQUEST_HEADERS, DETECTOR_MODEL_PATH,
-                    DETECTOR_CONFIG_PATH, DETECTOR_BBOX_CONF_THRESHOLD, MAX_IMAGE_MODERATED_SIZE, VISUAL_BLUR_POWER,
-                    BLUR_MODEL_PATH, VISUAL_BLUR_BBOX_EXPANSION, DRAW_BBOX, BBOX_LINE_THICKNESS, BBOX_LINE_COLOR,
-                    GENERATOR_MODEL_PATH, GENERATOR_CONFIG_PATH)
+from config import (CACHE_FOLDER, DEBUG, CLASSIFIER_CONF_THRESHOLD, MAX_IMAGE_FILE_SIZE,
+                    CLASSIFIER_CONFIG_PATH, INGREDIENTS_CONFIG_PATH, CLASSIFIER_MODEL_PATH,
+                    REQUEST_HEADERS, DETECTOR_MODEL_PATH, DETECTOR_CONFIG_PATH,
+                    DETECTOR_BBOX_CONF_THRESHOLD, MAX_IMAGE_MODERATED_SIZE, VISUAL_BLUR_POWER,
+                    BLUR_MODEL_PATH, VISUAL_BLUR_BBOX_EXPANSION, DRAW_BBOX, BBOX_LINE_THICKNESS,
+                    BBOX_LINE_COLOR, GENERATOR_MODEL_PATH, GENERATOR_CONFIG_PATH)
 
 from utils import get_random_filename, clear_cache
 from models.models import ImageProcessor
@@ -77,7 +78,8 @@ def predict(src, src_type: str) -> tuple[str, float, tuple[float, float, float, 
     if src_type == "file":
         src.save(full_filename)
 
-    ingredients, confidence, b_box = image_processor.predict(path=full_filename, threshold=CLASSIFIER_CONF_THRESHOLD)
+    ingredients, confidence, b_box = image_processor.predict(path=full_filename,
+                                                             threshold=CLASSIFIER_CONF_THRESHOLD)
 
     files_to_delete.append(full_filename)
 

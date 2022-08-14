@@ -56,7 +56,7 @@ def generate_image(latent: Union[np.ndarray, None], ingr_list) -> str:
     condition[ingr_list] = 1.
     image_processor.generate_to_file(latent, condition, full_filename)
     files_to_delete.append(full_filename)
-    return filename
+    return full_filename
 
 
 def predict(src, src_type: str) -> tuple[str, float, tuple[float, float, float, float], str]:

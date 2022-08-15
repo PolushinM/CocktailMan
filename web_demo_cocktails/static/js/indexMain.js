@@ -12,13 +12,19 @@ $( function() {
         document.getElementById('input_url').value = null;
     });
 
+    $('#img_cocktail').on("load", function(){
+        if (image_downloading) {
+            image_downloading = false
+            btn_spinner_stop()
+        }
+    });
+
 })
 
+let image_downloading = false
+
 function AjaxRequest(formData) {
-    let button = $('#make_button')
-    button.prop('disabled', true)
-    button.children(0).prop('hidden', false)
-    console.log(button)
+    btn_spinner_run()
 
     $.ajax({type: 'POST',
         url: '/',
@@ -28,21 +34,32 @@ function AjaxRequest(formData) {
         processData: false,
 
         success: function(response) {
+            image_downloading = true
             let data = jQuery.parseJSON(response);
             CloseMessage();
             ShowRecipe(data);
             if (data['flash_message'] !== "") {
                 FlashMessage(data['flash_message']);
                 }
-            button.prop('disabled', false)
-            button.children(0).prop('hidden', true)
-            console.log(button)
+            setTimeout("btn_spinner_stop()", 2000);
             },
 
         error: function(error) {
             console.log(error);
             },
     });
+}
+
+function btn_spinner_run() {
+    let button = $('#make_button')
+    button.prop('disabled', true)
+    button.children(0).prop('hidden', false)
+}
+
+function btn_spinner_stop() {
+    let button = $('#make_button')
+    button.prop('disabled', false)
+    button.children(0).prop('hidden', true)
 }
 
 function ShowRecipe(data) {

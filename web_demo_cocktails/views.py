@@ -47,6 +47,7 @@ def index():
             try:
                 recipe, confidence, bbox, filename = predict(image_url, src_type="url")
                 image_path = os.path.join(CACHE_FOLDER, filename)
+                print(recipe, confidence, bbox, filename)
                 if bbox[2] * bbox[3] > 0.01:
                     blur_bounding_box(image_path, bbox)
                 return send_request(recipe=recipe, confidence=confidence, image_path=image_path)

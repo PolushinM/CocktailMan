@@ -21,7 +21,10 @@
                 <input type="text" id="input_url" name="image_url" class="form-control" placeholder="Ссылка на изображение">
             </div>
             <div class="col-sm-auto" id="make_button_div">
-                {{ form.submit(class_="btn btn-primary", id="make_button") }}
+                <button class="btn btn-primary" type="button" id="make_button">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" hidden></span>
+                    Приготовить!
+                </button>
             </div>
         </div>
     </form>

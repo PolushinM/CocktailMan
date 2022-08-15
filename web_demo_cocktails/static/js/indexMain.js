@@ -11,9 +11,15 @@ $( function() {
         document.getElementById('file-selector').value = null;
         document.getElementById('input_url').value = null;
     });
+
 })
 
 function AjaxRequest(formData) {
+    let button = $('#make_button')
+    button.prop('disabled', true)
+    button.children(0).prop('hidden', false)
+    console.log(button)
+
     $.ajax({type: 'POST',
         url: '/',
         data: formData,
@@ -28,11 +34,13 @@ function AjaxRequest(formData) {
             if (data['flash_message'] !== "") {
                 FlashMessage(data['flash_message']);
                 }
+            button.prop('disabled', false)
+            button.children(0).prop('hidden', true)
+            console.log(button)
             },
 
         error: function(error) {
             console.log(error);
-
             },
     });
 }

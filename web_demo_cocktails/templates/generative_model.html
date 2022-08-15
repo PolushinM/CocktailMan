@@ -42,9 +42,11 @@
           </div>
       {%- endif %}
         <div class="text-center">
-            <button type="button" class="btn btn-primary" onclick=generate_image()>Нарисовать!</button>
+            <button class="btn btn-primary" type="button" onclick=generate_image() id="draw_button">
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" hidden></span>
+                Нарисовать!
+            </button>
         </div>
-
     </form>
 
     <div class="text-center">
@@ -54,6 +56,10 @@
           <img src="{{ url_for('static', filename="placeholder.jpg") }}" id="img_cocktail" class="img-thumbnail" alt="Коктейль не загрузился">
         {%- endif %}
     </div>
+
+
+
+
 
     <div class="text-left">
         <a href="{{ url_for('index') }}" id="generative_model_link">

@@ -71,7 +71,7 @@ class ImageProcessor:
                 np.uint8(np.moveaxis(classification_image * 127.5 + 127.5, 0, 2)), mode="RGB")
 
             classification_image.save(
-                "/home/maksim/gitrepo/CocktailMan/web_demo_cocktails/cache/classification_image.jpg",
+                "cache/classification_image.jpg",
                 "JPEG", quality=100, subsampling=0)
 
         return ingredients, confidence, b_box

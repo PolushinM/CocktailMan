@@ -1,4 +1,5 @@
 pyvenv.cfg
+/heroku-deploy
 /lib
 /.idea
 /bin

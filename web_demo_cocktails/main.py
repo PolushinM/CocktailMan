@@ -7,6 +7,8 @@ from typing import Union
 import numpy as np
 from werkzeug.utils import secure_filename
 
+from logger import logger
+
 
 from config import (CACHE_FOLDER, DEBUG, CLASSIFIER_CONF_THRESHOLD, MAX_IMAGE_FILE_SIZE,
                     CLASSIFIER_CONFIG_PATH, INGREDIENTS_CONFIG_PATH, CLASSIFIER_MODEL_PATH,
@@ -17,6 +19,7 @@ from config import (CACHE_FOLDER, DEBUG, CLASSIFIER_CONF_THRESHOLD, MAX_IMAGE_FI
 
 from utils import get_random_filename, clear_cache
 from models.models import ImageProcessor
+
 
 files_to_delete = []
 
@@ -30,6 +33,7 @@ image_processor = ImageProcessor(max_moderated_size=MAX_IMAGE_MODERATED_SIZE,
                                  blur_model_path=BLUR_MODEL_PATH,
                                  generator_model_path=GENERATOR_MODEL_PATH,
                                  generator_config_path=GENERATOR_CONFIG_PATH,
+                                 cache_folder=CACHE_FOLDER,
                                  debug=DEBUG)
 
 INGREDIENTS_TEXT = image_processor.ingredients_text
@@ -57,6 +61,7 @@ def generate_image(latent: Union[np.ndarray, None], ingr_list) -> str:
     condition[ingr_list] = 1.
     image_processor.generate_to_file(latent, condition, full_filename)
     files_to_delete.append(full_filename)
+    logger.debug(f"Main: generate image. latent = {latent}, condition = {condition}, full_filename = {full_filename}")
     return full_filename
 
 
@@ -71,8 +76,7 @@ def predict(src, src_type: str) -> tuple[str, float, tuple[float, float, float, 
         try:
             file.write(urllib.request.urlopen(req).read(MAX_IMAGE_FILE_SIZE))
         except Exception as e_urllib:
-            if DEBUG:
-                print("urllib", e_urllib)
+            logger.error(f"Main: urllib exception: {e_urllib}")
         finally:
             file.close()
     if src_type == "file":
@@ -80,9 +84,8 @@ def predict(src, src_type: str) -> tuple[str, float, tuple[float, float, float, 
 
     ingredients, confidence, b_box = image_processor.predict(path=full_filename,
                                                              threshold=CLASSIFIER_CONF_THRESHOLD)
-
     files_to_delete.append(full_filename)
-
+    logger.debug(f"Main: predict ingredients. src_type = {src_type}")
     return generate_recipe(ingredients), confidence, b_box, filename
 
 
@@ -97,3 +100,4 @@ def blur_bounding_box(path: str, b_box: tuple[float, float, float, float]):
                                           b_box=b_box,
                                           thickness=BBOX_LINE_THICKNESS,
                                           color=BBOX_LINE_COLOR)
+    logger.debug(f"Main: blur bounding box. path = {path}, b_box = {b_box}")

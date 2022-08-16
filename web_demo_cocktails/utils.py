@@ -5,6 +5,7 @@ from math import pi, sin
 from urllib.parse import urlparse
 
 from config import RANDOM_FILENAME_LENGTH
+from logger import logger
 
 
 def get_random_filename():
@@ -37,9 +38,18 @@ def uri_validator(uri):
         assert len(uri) > 0
         result = urlparse(uri)
         return all([result.scheme, result.netloc])
-    except Exception:
+    except Exception as exception:
+        logger.info(f"uri_validator: {str(exception)}")
         return False
 
 
 def clip(val, min_=0, max_=1):
     return min_ if val < min_ else max_ if val > max_ else val
+
+
+def log_error(text):
+    logger.error(text)
+
+
+def log_debug(text):
+    logger.debug(text)

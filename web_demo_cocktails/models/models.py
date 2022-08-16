@@ -79,8 +79,7 @@ class ImageProcessor:
 
         cropped_image = self.__crop_image(image=np.asarray(image), coordinates=crop_coordinates)
 
-        classification_image = self.classifier.prepare_image(Image.fromarray(cropped_image.astype('uint8'),
-                                                                             mode="RGB"))
+        classification_image = self.classifier.prepare_image(Image.fromarray(cropped_image.astype('uint8'), mode="RGB"))
 
         classification_image = self.blur_model.blur_image(image=classification_image,
                                                           blur_bbox=crop_blur_bbox,
@@ -176,8 +175,8 @@ class ImageProcessor:
         # image.save(path, "JPEG")
         self.__save_image(image, path)
 
-    def __get_crop_coordinates(self, b_box: tuple[float, float, float, float], image_size: tuple[int, int]) \
-            -> tuple[tuple[int, int, int, int, int, int, int, int], tuple[float, float, float, float]]:
+    def __get_crop_coordinates(self, b_box: tuple[float, float, float, float], image_size: tuple[int, int]) -> tuple[
+        tuple[int, int, int, int, int, int, int, int], tuple[float, float, float, float]]:
 
         width, height = image_size
         x_min_r, y_min_r, x_max_r, y_max_r = b_box
@@ -425,11 +424,7 @@ class BlurModel:
         return result
 
     def blur_image(self, image: np.ndarray, blur_bbox: tuple, power: float, expansion: float = 1.0) -> np.ndarray:
-        mask = self.__generate_blur_mask((image.shape[2],
-                                          image.shape[1]),
-                                         blur_bbox,
-                                         power=power,
-                                         expansion=expansion)
+        mask = self.__generate_blur_mask((image.shape[2], image.shape[1]), blur_bbox, power=power, expansion=expansion)
         mask = np.moveaxis(mask, 2, 3)
         blur_input = np.concatenate((image[None, ...], mask), axis=1)
         blured_image = self.blur_request.infer([blur_input])[self.model_output][0]
@@ -459,6 +454,5 @@ class Generator:
         if latent is None:
             latent = np.random.normal(0, self.std, self.latent_size)
         inputs = np.concatenate((latent.astype('float32'), condition.astype('float32')), axis=0)[None, :]
-        output = self.infer_request.infer([inputs])[self.model_output][0] \
-                 * self.contrast - (self.contrast - 1) * 0.5
+        output = self.infer_request.infer([inputs])[self.model_output][0] * self.contrast - (self.contrast - 1) * 0.5
         return np.clip(output, a_max=1., a_min=0.)

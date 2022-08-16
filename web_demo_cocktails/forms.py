@@ -7,7 +7,7 @@ from markupsafe import Markup
 from config import MAX_IMAGE_FILE_SIZE
 
 
-class ButtonWidget(object):
+class ButtonWidget:
     """
     Renders a multi-line text area.
     `rows` and `cols` ought to be passed as keyword args when rendering.

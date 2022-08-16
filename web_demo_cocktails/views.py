@@ -75,7 +75,7 @@ def index():
                 flash("Не могу скачать изображение.")
                 logger.error(f"url_exist exception: {str(exception)}")
                 return render_index(form)
-        return render_index(form)
+    return render_index(form)
 
 
 @app.route('/generative_model', methods=['GET', 'POST'])

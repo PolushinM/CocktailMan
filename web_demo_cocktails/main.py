@@ -61,7 +61,11 @@ def generate_image(latent: Union[np.ndarray, None], ingr_list) -> str:
     condition[ingr_list] = 1.
     image_processor.generate_to_file(latent, condition, full_filename)
     files_to_delete.append(full_filename)
-    logger.debug(f"Main: generate image. latent = {latent}, condition = {condition}, full_filename = {full_filename}")
+    logger.debug(f"Main: generate image. "
+                 f"latent = {latent}, "
+                 f"condition = {condition}, "
+                 f"full_filename = {full_filename}"
+                 )
     return full_filename
 
 

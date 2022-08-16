@@ -13,18 +13,18 @@
         <div class="form-group row">
             {{ form.hidden_tag() }}
             <div class="input-group col" id="input_div">
-                <label id="browsebutton" class="btn btn-outline-light" >
-                    {{ form.input_file(id="file-selector") }}
-                    Открыть...
+                <label id="browsebutton" class="btn btn-default input-group-addon" >
+                  {{ form.input_file(id="file-selector") }}
+                  Открыть...
                 </label>
                 <label for="input_url"></label>
                 <input type="text" id="input_url" name="image_url" class="form-control" placeholder="Ссылка на изображение">
             </div>
             <div class="col-sm-auto" id="make_button_div">
-                <button class="btn btn-primary" type="button" id="make_button">
-                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" hidden></span>
-                    Приготовить!
-                </button>
+                {{ form.button(class_="btn btn-primary",
+                id="make_button",
+                label="Приготовить!",
+                inner_template='<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" hidden></span>') }}
             </div>
         </div>
     </form>
@@ -34,13 +34,17 @@
     </div>
 
     <div class="text-center">
-        <p class="h6" id="recipe"></p>
-        <p class="h6" id="confidence"></p>
+        <p class="h6" id="recipe">{{ recipe }}</p>
+        <p class="h6" id="confidence">{{ conf_text }}</p>
         <div id="flash_div"></div>
-        <img src="{{ url_for('static', filename="placeholder.jpg") }}" id="img_cocktail" class="img-thumbnail" alt="Коктейль не загрузился">
+
+        {%- if '.jpg' in image_filename %}
+          <img src="{{ url_for('download_file', filename=image_filename) }}" id="img_cocktail" class="img-thumbnail" alt="Коктейль не загрузился">
+        {% else %}
+          <img src="{{ url_for('static', filename="placeholder.jpg") }}" id="img_cocktail" class="img-thumbnail" alt="Коктейль не загрузился">
+        {%- endif %}
+
     </div>
-
-
 
     <div class="text-left">
         <a href="{{ url_for('generative_model') }}" id="generative_model_link">
@@ -69,10 +73,13 @@
 {% block scripts %}
 {{ super() }}
 
+    <script>
+        const messages = {{ get_flashed_messages() | tojson }}
+        const ingredients = {{ ingr_text | tojson }}.join('<br/>')
+    </script>
+
     <script src="{{ url_for('static', filename='js/indexMain.js') }}"></script>
     <script src="{{ url_for('static', filename='js/inputFileButton.js') }}" ></script>
-
-    <script> const ingredients_list = {{ ingr_list | tojson }}.join('<br/>')</script>
-    <script src="{{ url_for('static', filename='js/showIngredients.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/showIngredients.js') }}" ></script>
 
 {% endblock %}

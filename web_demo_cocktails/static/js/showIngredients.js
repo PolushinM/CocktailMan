@@ -10,15 +10,15 @@ $(function () {
     placement: 'bottom',
     trigger: 'manual',
     })
-})
+});
 
 popover_link.on('hidden.bs.popover', function () {
   popower_visible = false;
-})
+});
 
 popover_link.on('shown.bs.popover', function () {
   popower_visible = true;
-})
+});
 
 popover_link.click(function() {
 
@@ -28,15 +28,15 @@ popover_link.click(function() {
     else {
         popover_link.popover('show');
     }
-})
+});
 
 popover_link.focus(function() {
     popover_link.popover('show');
-})
+});
 
 popover_link.blur(function() {
     popover_link.popover('hide');
-})
+});
 
 window.addEventListener('scroll', function(event) {
     event.stopImmediatePropagation();

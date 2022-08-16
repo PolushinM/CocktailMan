@@ -1,15 +1,15 @@
 $( function() {
-    $('#make_button').click(function (e) {
-        e.preventDefault()
-        const formData = new FormData();
-        formData.append("input_file", $('#file-selector')[0].files[0]);
-        formData.append("image_url", $('#input_url').val());
-        AjaxRequest(formData);
-    });
+
+    CloseMessage();
+    FlashMessage(messages[0])
 
     $("#input_url").focus(function() {
         document.getElementById('file-selector').value = null;
         document.getElementById('input_url').value = null;
+    });
+
+    $("#input_form").on("submit", function() {
+        btn_spinner_run()
     });
 
     $('#img_cocktail').on("load", function(){
@@ -51,6 +51,8 @@ function AjaxRequest(formData) {
 }
 
 function btn_spinner_run() {
+    let template = $("#flash_message_template").html();
+
     let button = $('#make_button')
     button.prop('disabled', true)
     button.children(0).prop('hidden', false)
@@ -79,11 +81,13 @@ function ShowRecipe(data) {
 }
 
 function FlashMessage(message) {
-    let template = $("#flash_message_template").html();
+    if (message) {
+        let template = $("#flash_message_template").html();
     $('#flash_div').html(template);
     $('.flash_message_text').text(message);
     document.getElementById('input_url').value = null;
     setTimeout("CloseMessage()", 2000);
+    }
 }
 
 function CloseMessage() {

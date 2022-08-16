@@ -431,8 +431,6 @@ class Generator:
     def generate_image_array(self, latent: Union[np.ndarray, None], condition: np.ndarray) -> np.ndarray:
         if latent is None:
             latent = np.random.normal(0, self.std, self.latent_size)
-
         inputs = np.concatenate((latent.astype('float32'), condition.astype('float32')), axis=0)[None, :]
         output = self.infer_request.infer([inputs])[self.model_output][0] * self.contrast - (self.contrast - 1) * 0.5
-
         return np.clip(output, a_max=1., a_min=0.)

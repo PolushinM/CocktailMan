@@ -75,7 +75,7 @@
 
     <script>
         const messages = {{ get_flashed_messages() | tojson }}
-        const ingredients = {{ ingr_text | tojson }}.join('<br/>')
+        const ingredients = {{ ingr_text | tojson }}
     </script>
 
     <script src="{{ url_for('static', filename='js/indexMain.js') }}"></script>

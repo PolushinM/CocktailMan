@@ -1,10 +1,11 @@
+import os
 import json
 from typing import Union
 
 import numpy as np
 from openvino.runtime import Core
 from PIL import Image, ImageDraw
-from utils import clip
+from utils import clip, log_error, log_debug
 
 
 class ImageProcessor:
@@ -19,6 +20,7 @@ class ImageProcessor:
                  blur_model_path,
                  generator_model_path,
                  generator_config_path,
+                 cache_folder,
                  debug):
 
         self.classifier = Classifier(onnx_model_path=classifier_model_path,
@@ -36,13 +38,32 @@ class ImageProcessor:
 
         self.generator = Generator(onnx_model_path=generator_model_path,
                                    model_config_path=generator_config_path,
-                                   debug=False)
+                                   debug=debug)
 
         self.max_size = max_moderated_size
         self.debug = debug
         self.blur_bbox_expansion = self.classifier.blur_bbox_expansion
         self.detector_bbox_expansion = self.classifier.detector_bbox_expansion
         self.blur_power = self.classifier.blur_power
+        self.cache_folder = cache_folder
+        log_debug(f"Initialise Image Processor"
+                  f"max_moderated_size = {max_moderated_size}, "
+                  f"classifier_model_path = {classifier_model_path}, "
+                  f"classifier_config_path = {classifier_config_path}, "
+                  f"ingredients_config_path = {ingredients_config_path}, "
+                  f"detector_model_path = {detector_model_path}, "
+                  f"detector_config_path = {detector_config_path}, "
+                  f"detector_bbox_conf_threshold = {detector_bbox_conf_threshold}, "
+                  f"blur_model_path = {blur_model_path}, "
+                  f"generator_model_path = {generator_model_path}, "
+                  f"generator_config_path = {generator_config_path}, "
+                  f"cache_folder = {cache_folder}, "
+                  f"debug = {debug}, "
+                  f"blur_bbox_expansion = {self.blur_bbox_expansion}, "
+                  f"detector_bbox_expansion = {self.detector_bbox_expansion}, "
+                  f"blur_power = {self.blur_power}, "
+                  f"cache_folder = {cache_folder}"
+                  )
 
     def predict(self, path: str, threshold: float) -> tuple[list[str], float, tuple[float, float, float, float]]:
 
@@ -69,10 +90,12 @@ class ImageProcessor:
         if self.debug:
             classification_image = Image.fromarray(
                 np.uint8(np.moveaxis(classification_image * 127.5 + 127.5, 0, 2)), mode="RGB")
-
-            classification_image.save(
-                "cache/classification_image.jpg",
-                "JPEG", quality=100, subsampling=0)
+            path = os.path.join(self.cache_folder, "classification_image.jpg")
+            try:
+                classification_image.save(path, "JPEG", quality=100, subsampling=0)
+                log_debug(f"Classification image saved at {path}")
+            except Exception as exception:
+                log_error(f"Unable to save classification image, exception: {str(exception)}")
 
         return ingredients, confidence, b_box
 
@@ -102,8 +125,7 @@ class ImageProcessor:
         try:
             image = Image.open(path).convert("RGB")
         except Exception as exception:
-            if self.debug:
-                print(str(exception))
+            log_error(f"Unable open image, exception: {str(exception)}")
             return None
         # Size moderation
         width, height = image.size
@@ -154,7 +176,7 @@ class ImageProcessor:
         self.__save_image(image, path)
 
     def __get_crop_coordinates(self, b_box: tuple[float, float, float, float], image_size: tuple[int, int]) -> tuple[
-            tuple[int, int, int, int, int, int, int, int], tuple[float, float, float, float]]:
+        tuple[int, int, int, int, int, int, int, int], tuple[float, float, float, float]]:
 
         width, height = image_size
         x_min_r, y_min_r, x_max_r, y_max_r = b_box
@@ -260,8 +282,8 @@ class Classifier:
         confidence = np.prod(probs[pos_ind]) * np.prod(1 - probs[neg_ind])
         return ingredients, confidence
 
-    def __import_json_model_config(self, model_config_path: str, ingredients_config_path: str) -> tuple[
-                                                                                dict, np.ndarray, list[str]]:
+    def __import_json_model_config(self, model_config_path: str, ingredients_config_path: str) -> \
+            tuple[dict, np.ndarray, list[str]]:
         # Opening model JSON config
         with open(model_config_path, 'r', encoding="utf-8") as file:
             model_config = json.load(file)

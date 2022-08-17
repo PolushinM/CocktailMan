@@ -101,21 +101,21 @@ class ImageProcessor:
 
     def blur_bounding_box(self, path: str, b_box: tuple, power: float, expansion: float) -> None:
         if b_box is not None:
-            with Image.open(path).convert("RGB") as image:
+            image = self.__open_image(path)
 
-                width, height = image.size
-                if width % 4 != 0:
-                    image = image.crop((1, 0, width // 4 * 4 + 1, height))
-                width, height = image.size
-                if height % 4 != 0:
-                    image = image.crop((0, 1, width, height // 4 * 4 + 1))
+            width, height = image.size
+            if width % 4 != 0:
+                image = image.crop((1, 0, width // 4 * 4 + 1, height))
+            width, height = image.size
+            if height % 4 != 0:
+                image = image.crop((0, 1, width, height // 4 * 4 + 1))
 
-                image = np.moveaxis(np.asarray(image), 2, 0)
-                blured_image = self.blur_model.blur_image(image,
-                                                          blur_bbox=b_box,
-                                                          power=power,
-                                                          expansion=expansion)
-                self.__save_image(blured_image, path)
+            image = np.moveaxis(np.asarray(image), 2, 0)
+            blured_image = self.blur_model.blur_image(image,
+                                                      blur_bbox=b_box,
+                                                      power=power,
+                                                      expansion=expansion)
+            self.__save_image(blured_image, path)
 
     def generate_to_file(self, latent: Union[np.ndarray, None], condition: np.ndarray, path: str) -> None:
         image_array = self.generator.generate_image_array(latent, condition) * 255

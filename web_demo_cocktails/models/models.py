@@ -1,3 +1,4 @@
+import gc
 import os
 import json
 from typing import Union
@@ -46,7 +47,7 @@ class ImageProcessor:
         self.detector_bbox_expansion = self.classifier.detector_bbox_expansion
         self.blur_power = self.classifier.blur_power
         self.cache_folder = cache_folder
-        log_debug(f"Initialise Image Processor"
+        log_debug(f"Initialise Image Processor: "
                   f"max_moderated_size = {max_moderated_size}, "
                   f"classifier_model_path = {classifier_model_path}, "
                   f"classifier_config_path = {classifier_config_path}, "
@@ -100,25 +101,28 @@ class ImageProcessor:
         return ingredients, confidence, b_box
 
     def blur_bounding_box(self, path: str, b_box: tuple, power: float, expansion: float) -> None:
+
         if b_box is not None:
-            with Image.open(path).convert("RGB") as image:
+            image = self.__open_image(path)
 
-                width, height = image.size
-                if width % 4 != 0:
-                    image = image.crop((1, 0, width // 4 * 4 + 1, height))
-                width, height = image.size
-                if height % 4 != 0:
-                    image = image.crop((0, 1, width, height // 4 * 4 + 1))
+            width, height = image.size
+            if width % 4 != 0:
+                image = image.crop((1, 0, width // 4 * 4 + 1, height))
+            width, height = image.size
+            if height % 4 != 0:
+                image = image.crop((0, 1, width, height // 4 * 4 + 1))
 
-                image = np.moveaxis(np.asarray(image), 2, 0)
-                blured_image = self.blur_model.blur_image(image,
-                                                          blur_bbox=b_box,
-                                                          power=power,
-                                                          expansion=expansion)
-                self.__save_image(blured_image, path)
+            image = np.moveaxis(np.asarray(image), 2, 0)
+            blured_image = self.blur_model.blur_image(image,
+                                                      blur_bbox=b_box,
+                                                      power=power,
+                                                      expansion=expansion)
+            self.__save_image(blured_image, path)
 
     def generate_to_file(self, latent: Union[np.ndarray, None], condition: np.ndarray, path: str) -> None:
+
         image_array = self.generator.generate_image_array(latent, condition) * 255
+
         self.__save_image(image_array, path)
 
     def __open_image(self, path: str) -> Union[Image.Image, None]:
@@ -137,6 +141,7 @@ class ImageProcessor:
                 h = self.max_size
                 w = round(self.max_size * width / height)
             image = image.resize((w, h))
+        log_debug(f"image size = {image.size}")
         return image
 
     def __save_image(self, image: Union[np.ndarray, Image.Image], path: str) -> None:
@@ -272,6 +277,7 @@ class Classifier:
         del open_vino_core
 
     def classify_image(self, image: np.ndarray, threshold: float):
+
         logits = self.model_onnx([image[None, :, :, :]])[self.model_onnx.output(0)][0]
         probs = 1 / (1 + np.exp(-logits))
 
@@ -280,6 +286,7 @@ class Classifier:
         pos_ind = (probs > threshold).nonzero()[0]
         neg_ind = (probs < threshold).nonzero()[0]
         confidence = np.prod(probs[pos_ind]) * np.prod(1 - probs[neg_ind])
+
         return ingredients, confidence
 
     def __import_json_model_config(self, model_config_path: str, ingredients_config_path: str) -> \
@@ -300,6 +307,7 @@ class Classifier:
     def prepare_image(self, image: Image) -> np.ndarray:
         classification_image = image.resize((self.image_size, self.image_size))
         classification_image = np.moveaxis(np.asarray(classification_image), 2, 0) / 127.5 - 1.0
+        log_debug(f"Prepared for classification image shape = {classification_image.shape}")
         return classification_image
 
 

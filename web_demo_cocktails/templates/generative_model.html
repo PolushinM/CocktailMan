@@ -50,16 +50,8 @@
     </form>
 
     <div class="text-center">
-        {%- if '.jpg' in image_filename %}
-          <img src="{{ url_for('download_file', filename=image_filename) }}" id="img_cocktail" class="img-thumbnail" alt="Коктейль не загрузился">
-        {% else %}
-          <img src="{{ url_for('static', filename="placeholder.jpg") }}" id="img_cocktail" class="img-thumbnail" alt="Коктейль не загрузился">
-        {%- endif %}
+        <img src="{{ url_for('static', filename="placeholder.jpg") }}" id="img_cocktail" class="img-thumbnail" alt="Коктейль не загрузился">
     </div>
-
-
-
-
 
     <div class="text-left">
         <a href="{{ url_for('index') }}" id="generative_model_link">

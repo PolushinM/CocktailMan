@@ -92,6 +92,7 @@ body {
   min-width: 50%;
   object-fit: contain;
   border: none;
+  user-select: none;
 }
 
 #github_link {

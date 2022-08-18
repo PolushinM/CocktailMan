@@ -11,6 +11,7 @@ from utils import clip, log_error, log_debug
 class ImageProcessor:
     def __init__(self,
                  max_moderated_size,
+                 jpeg_quality,
                  classifier_model_path,
                  classifier_config_path,
                  ingredients_config_path,
@@ -21,6 +22,11 @@ class ImageProcessor:
                  generator_model_path,
                  generator_config_path,
                  cache_folder,
+                 visual_blur_power,
+                 visual_blur_bbox_expansion,
+                 draw_bbox,
+                 bbox_line_thickness,
+                 bbox_line_color,
                  debug):
 
         self.classifier = Classifier(onnx_model_path=classifier_model_path,
@@ -41,12 +47,19 @@ class ImageProcessor:
                                    debug=debug)
 
         self.max_size = max_moderated_size
+        self.jpeg_quality = jpeg_quality
         self.debug = debug
         self.blur_bbox_expansion = self.classifier.blur_bbox_expansion
         self.detector_bbox_expansion = self.classifier.detector_bbox_expansion
         self.blur_power = self.classifier.blur_power
         self.cache_folder = cache_folder
-        log_debug(f"Initialise Image Processor"
+        self.visual_blur_power = visual_blur_power
+        self.visual_blur_bbox_expansion = visual_blur_bbox_expansion
+        self.draw_bbox = draw_bbox
+        self.bbox_line_thickness = bbox_line_thickness
+        self.bbox_line_color = bbox_line_color
+
+        log_debug(f"Initialise Image Processor (IP): "
                   f"max_moderated_size = {max_moderated_size}, "
                   f"classifier_model_path = {classifier_model_path}, "
                   f"classifier_config_path = {classifier_config_path}, "
@@ -58,67 +71,90 @@ class ImageProcessor:
                   f"generator_model_path = {generator_model_path}, "
                   f"generator_config_path = {generator_config_path}, "
                   f"cache_folder = {cache_folder}, "
-                  f"debug = {debug}, "
                   f"blur_bbox_expansion = {self.blur_bbox_expansion}, "
                   f"detector_bbox_expansion = {self.detector_bbox_expansion}, "
                   f"blur_power = {self.blur_power}, "
-                  f"cache_folder = {cache_folder}"
+                  f"cache_folder = {cache_folder}, "
+                  f"visual_blur_power = {self.visual_blur_power}, "
+                  f"visual_blur_bbox_expansion = {self.visual_blur_bbox_expansion}, "
+                  f"draw_bbox = {self.draw_bbox}, "
+                  f"bbox_line_thickness = {self.bbox_line_thickness}, "
+                  f"bbox_line_color = {self.bbox_line_color}"
                   )
 
-    def predict(self, path: str, threshold: float) -> tuple[list[str], float, tuple[float, float, float, float]]:
+    def predict_blur_save(self, path: str, threshold: float) \
+            -> tuple[list[str], float, tuple[float, float, float, float]]:
 
         image = self.__open_image(path)
+        log_debug(f"IP: Image opened at {path}")
         if image is None:
             return [], 0., (0., 0., 0., 0.)
+
+        ingredients, confidence, b_box = self.classify(image, threshold)
+        log_debug(f"IP: Image classified: ingredients = {ingredients}, "
+                  f"confidence = {confidence}, "
+                  f"b_box = {b_box}")
+
+        if b_box[2] * b_box[3] > 0.01:
+            blured_image = self.blur_model.blur_image(image=np.asarray(image),
+                                                      blur_bbox=b_box,
+                                                      power=self.visual_blur_power,
+                                                      expansion=self.visual_blur_bbox_expansion)
+            result_image = Image.fromarray(np.moveaxis(blured_image, 0, 2).astype('uint8'), mode="RGB")
+
+            if self.draw_bbox:
+                result_image = self.draw_bounding_box(image=result_image,
+                                                      b_box=b_box,
+                                                      thickness=self.bbox_line_thickness,
+                                                      color=self.bbox_line_color)
+            log_debug(f"IP: blur bounding box. path = {path}, "
+                      f"b_box = {b_box}, "
+                      f"result_image.size={result_image.size}")
+        else:
+            result_image = image
+
+        self.__save_image(result_image, path)
+        log_debug(f"IP: Image saved at {path}")
+        return ingredients, confidence, b_box
+
+    def classify(self, image: Image.Image, threshold: float) \
+            -> tuple[list[str], float, tuple[float, float, float, float]]:
 
         b_box = self.detector.predict_bbox(image)
         if b_box is None:
             return [], 0., (0., 0., 0., 0.)
+        log_debug(f"IP: classify b_box={b_box}")
 
         crop_coordinates, crop_blur_bbox = self.__get_crop_coordinates(b_box, image.size)
+        log_debug(f"IP: crop_coordinates={crop_coordinates}, crop_blur_bbox={crop_blur_bbox}")
 
         cropped_image = self.__crop_image(image=np.asarray(image), coordinates=crop_coordinates)
+        log_debug(f"IP: cropped_image.shape={cropped_image.shape}")
 
-        classification_image = self.classifier.prepare_image(Image.fromarray(cropped_image.astype('uint8'), mode="RGB"))
+        classification_image = self.classifier.prepare_image(
+            Image.fromarray(cropped_image.astype('uint8'), mode="RGB"))
+        log_debug(f"IP: classification_image.shape={classification_image.size}")
 
         classification_image = self.blur_model.blur_image(image=classification_image,
                                                           blur_bbox=crop_blur_bbox,
                                                           power=self.blur_power)
+        log_debug(f"IP: classification_image.size={classification_image.shape}")
 
         ingredients, confidence = self.classifier.classify_image(classification_image, threshold)
 
         if self.debug:
-            classification_image = Image.fromarray(
-                np.uint8(np.moveaxis(classification_image * 127.5 + 127.5, 0, 2)), mode="RGB")
             path = os.path.join(self.cache_folder, "classification_image.jpg")
             try:
-                classification_image.save(path, "JPEG", quality=100, subsampling=0)
+                Image.fromarray(np.uint8(
+                    np.moveaxis(classification_image, 0, 2)), mode="RGB").save(path, "JPEG", quality=80)
                 log_debug(f"Classification image saved at {path}")
             except Exception as exception:
                 log_error(f"Unable to save classification image, exception: {str(exception)}")
 
         return ingredients, confidence, b_box
 
-    def blur_bounding_box(self, path: str, b_box: tuple, power: float, expansion: float) -> None:
-        if b_box is not None:
-            image = self.__open_image(path)
-
-            width, height = image.size
-            if width % 4 != 0:
-                image = image.crop((1, 0, width // 4 * 4 + 1, height))
-            width, height = image.size
-            if height % 4 != 0:
-                image = image.crop((0, 1, width, height // 4 * 4 + 1))
-
-            image = np.moveaxis(np.asarray(image), 2, 0)
-            blured_image = self.blur_model.blur_image(image,
-                                                      blur_bbox=b_box,
-                                                      power=power,
-                                                      expansion=expansion)
-            self.__save_image(blured_image, path)
-
     def generate_to_file(self, latent: Union[np.ndarray, None], condition: np.ndarray, path: str) -> None:
-        image_array = self.generator.generate_image_array(latent, condition) * 255
+        image_array = self.generator.generate_image(latent, condition) * 255
         self.__save_image(image_array, path)
 
     def __open_image(self, path: str) -> Union[Image.Image, None]:
@@ -129,14 +165,16 @@ class ImageProcessor:
             return None
         # Size moderation
         width, height = image.size
-        if (width > self.max_size) or (height > self.max_size):
+        if (width > self.max_size) or (height > self.max_size) or \
+                (width % 4 != 0) or (height % 4 != 0):
             if width >= height:
-                w = self.max_size
-                h = round(self.max_size * height / width)
+                w = round(self.max_size / 4) * 4
+                h = round(self.max_size * height / width / 4) * 4
             else:
-                h = self.max_size
-                w = round(self.max_size * width / height)
+                h = round(self.max_size / 4) * 4
+                w = round(self.max_size * width / height / 4) * 4
             image = image.resize((w, h))
+            log_debug(f"IP: Open Image.size={image.size}")
         return image
 
     def __save_image(self, image: Union[np.ndarray, Image.Image], path: str) -> None:
@@ -144,18 +182,16 @@ class ImageProcessor:
             image = np.moveaxis(image, 0, 2).astype(np.uint8)
             image = Image.fromarray(image)
         if isinstance(image, Image.Image):
-            image.save(path, "JPEG", quality=100, subsampling=0)
+            image.save(path, "JPEG", quality=self.jpeg_quality)
         else:
             raise ValueError("Argument 'image' must be numpy array or PIL Image")
 
-    def draw_bounding_box(self, path: str,
+    def draw_bounding_box(self, image: Image.Image,
                           b_box: Union[tuple[float, float, float, float], None],
                           thickness: float = 1.5,
-                          color: str = "#000000") -> None:
+                          color: str = "#000000") -> np.ndarray:
 
         x_min, y_min, x_max, y_max = b_box
-
-        image = self.__open_image(path)
 
         width, height = image.size
         x_min, x_max = round(clip(x_min, 0.01, 0.99) * width), round(clip(x_max, 0.01, 0.99) * width)
@@ -172,8 +208,8 @@ class ImageProcessor:
                   fill=color,
                   width=line_width,
                   joint='curve')
-        # image.save(path, "JPEG")
-        self.__save_image(image, path)
+        log_debug(f"IP: draw_bounding_box result.size={image.size}")
+        return image
 
     def __get_crop_coordinates(self, b_box: tuple[float, float, float, float], image_size: tuple[int, int]) -> tuple[
         tuple[int, int, int, int, int, int, int, int], tuple[float, float, float, float]]:
@@ -272,6 +308,7 @@ class Classifier:
         del open_vino_core
 
     def classify_image(self, image: np.ndarray, threshold: float):
+        image = np.asarray(image) / 127.5 - 1.0
         logits = self.model_onnx([image[None, :, :, :]])[self.model_onnx.output(0)][0]
         probs = 1 / (1 + np.exp(-logits))
 
@@ -299,7 +336,7 @@ class Classifier:
 
     def prepare_image(self, image: Image) -> np.ndarray:
         classification_image = image.resize((self.image_size, self.image_size))
-        classification_image = np.moveaxis(np.asarray(classification_image), 2, 0) / 127.5 - 1.0
+        # classification_image = np.moveaxis(np.asarray(classification_image), 2, 0)
         return classification_image
 
 
@@ -421,11 +458,13 @@ class BlurModel:
 
         result = (result ** -power).T[None, None, :, :]
 
+        result = np.moveaxis(result, 2, 3)
+
         return result
 
     def blur_image(self, image: np.ndarray, blur_bbox: tuple, power: float, expansion: float = 1.0) -> np.ndarray:
+        image = np.moveaxis(np.asarray(image), 2, 0)  # c*h*w
         mask = self.__generate_blur_mask((image.shape[2], image.shape[1]), blur_bbox, power=power, expansion=expansion)
-        mask = np.moveaxis(mask, 2, 3)
         blur_input = np.concatenate((image[None, ...], mask), axis=1)
         blured_image = self.blur_request.infer([blur_input])[self.model_output][0]
         return blured_image
@@ -449,8 +488,9 @@ class Generator:
         self.infer_request = self.generator_onnx.create_infer_request()
         self.model_output = self.generator_onnx.output(0)
         del model_onnx
+        del open_vino_core
 
-    def generate_image_array(self, latent: Union[np.ndarray, None], condition: np.ndarray) -> np.ndarray:
+    def generate_image(self, latent: Union[np.ndarray, None], condition: np.ndarray) -> np.ndarray:
         if latent is None:
             latent = np.random.normal(0, self.std, self.latent_size)
         inputs = np.concatenate((latent.astype('float32'), condition.astype('float32')), axis=0)[None, :]

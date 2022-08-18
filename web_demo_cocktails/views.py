@@ -4,7 +4,7 @@ from flask import render_template, request, send_from_directory, flash
 
 from forms import UploadForm
 
-from main import predict, INGREDIENTS_TEXT, blur_bounding_box, generate_image
+from main import predict, INGREDIENTS_TEXT, generate_image
 from utils import get_confidence_text, uri_validator
 from config import CACHE_FOLDER
 from logger import logger
@@ -50,9 +50,6 @@ def index():
                              f"bbox = {bbox}, "
                              f"filename = {filename}, "
                              f"image_path = {image_path}.")
-
-                if bbox[2] * bbox[3] > 0.01:
-                    blur_bounding_box(image_path, bbox)
                 return render_index(form, recipe, confidence, filename)
             except Exception as exception:
                 flash("Не могу прочитать изображение.")
@@ -67,9 +64,6 @@ def index():
                              f"bbox = {bbox}, "
                              f"filename = {filename}, "
                              f"image_path = {image_path}.")
-
-                if bbox[2] * bbox[3] > 0.01:
-                    blur_bounding_box(image_path, bbox)
                 return render_index(form, recipe, confidence, filename)
             except Exception as exception:
                 flash("Не могу скачать изображение.")

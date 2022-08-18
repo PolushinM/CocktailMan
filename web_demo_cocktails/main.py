@@ -37,7 +37,7 @@ image_processor = ImageProcessor(max_moderated_size=MAX_IMAGE_MODERATED_SIZE,
                                  cache_folder=CACHE_FOLDER,
                                  visual_blur_power=VISUAL_BLUR_POWER,
                                  visual_blur_bbox_expansion=VISUAL_BLUR_BBOX_EXPANSION,
-                                 draw_bbox=DRAW_BBOX,
+                                 draw_bbox=(DRAW_BBOX == 'True' or (DRAW_BBOX == 'Debug' and DEBUG)),
                                  bbox_line_thickness=BBOX_LINE_THICKNESS,
                                  bbox_line_color=BBOX_LINE_COLOR,
                                  debug=DEBUG)

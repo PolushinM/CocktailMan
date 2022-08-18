@@ -103,6 +103,7 @@ class ImageProcessor:
             result_image = Image.fromarray(np.moveaxis(blured_image, 0, 2).astype('uint8'), mode="RGB")
 
             if self.draw_bbox:
+                log_debug(f"IP: draw bbox")
                 result_image = self.draw_bounding_box(image=result_image,
                                                       b_box=b_box,
                                                       thickness=self.bbox_line_thickness,

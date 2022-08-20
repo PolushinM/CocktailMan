@@ -1,8 +1,15 @@
+"""Logger with custom format of logs."""
+
 import logging
 from config import DEBUG
 
 
 class CustomFormatter(logging.Formatter):
+    """Formatter instances are used to convert a LogRecord to text.
+    Formatter need to know how a LogRecord is constructed. It
+    responsible for converting a LogRecord to a string which can
+    be interpreted by human."""
+
     grey = "\x1b[0;37m"
     white = "\x1b[0;20m"
     yellow = "\x1b[33;20m"
@@ -22,6 +29,9 @@ class CustomFormatter(logging.Formatter):
     }
 
     def format(self, record):
+        """Format the specified record as text.
+        The record's attribute dictionary is used as the operand to a
+        string formatting operation which yields the returned string."""
         log_fmt = self.FORMATS.get(record.levelno)
         formatter = logging.Formatter(log_fmt)
         formatter.default_time_format = '%H:%M:%S'
@@ -30,6 +40,8 @@ class CustomFormatter(logging.Formatter):
 
 
 class CustomLogger(logging.Logger):
+    """Custom logger with custom logs formatting."""
+
     levels = {'CRITICAL': 50, 'FATAL': 50, 'Fatal': 50, 'fatal': 50, 1: 50,
               'ERROR': 40, 'Error': 40, 'error': 40, 2: 40, False: 40,
               'WARNING': 30, 'WARN': 30, 'Warning': 30, 'warning': 30, 3: 30,

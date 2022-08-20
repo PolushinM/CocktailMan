@@ -1,11 +1,14 @@
+"""Page views site backend."""
+
 import os
 import json
 from flask import render_template, request, send_from_directory, flash
 
 from forms import UploadForm
+from flask_wtf import FlaskForm
 
-from main import predict, INGREDIENTS_TEXT, generate_image
-from utils import get_confidence_text, uri_validator
+from main import predict, INGREDIENTS_TEXT, generate_image, get_confidence_text
+from utils import uri_validator
 from config import CACHE_FOLDER
 from logger import logger
 import app
@@ -15,6 +18,10 @@ app = app.get_app()
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    """Index page.
+        Returns:
+            Flask templates.render_template method.
+    """
     form = UploadForm()
 
     if request.method == "GET":
@@ -43,11 +50,10 @@ def index():
 
         if file_exist:
             try:
-                recipe, confidence, bbox, filename = predict(input_file, src_type="file")
+                recipe, confidence, filename = predict(input_file, src_type="file")
                 image_path = os.path.join(CACHE_FOLDER, filename)
                 logger.debug(f"file_exist: recipe = {recipe}, "
                              f"confidence = {confidence}, "
-                             f"bbox = {bbox}, "
                              f"filename = {filename}, "
                              f"image_path = {image_path}.")
                 return render_index(form, recipe, confidence, filename)
@@ -57,11 +63,10 @@ def index():
                 return render_index(form)
         if url_exist:
             try:
-                recipe, confidence, bbox, filename = predict(image_url, src_type="url")
+                recipe, confidence, filename = predict(image_url, src_type="url")
                 image_path = os.path.join(CACHE_FOLDER, filename)
                 logger.debug(f"url_exist: recipe = {recipe}, "
                              f"confidence = {confidence}, "
-                             f"bbox = {bbox}, "
                              f"filename = {filename}, "
                              f"image_path = {image_path}.")
                 return render_index(form, recipe, confidence, filename)
@@ -74,6 +79,10 @@ def index():
 
 @app.route('/generative_model', methods=['GET', 'POST'])
 def generative_model():
+    """Generative model page.
+        Returns:
+            Flask templates.render_template method.
+    """
     if request.method == "GET":
         logger.debug(f"Generative_model GET request received. INGREDIENTS_TEXT={INGREDIENTS_TEXT}")
         return render_template('generative_model.html',
@@ -89,10 +98,21 @@ def generative_model():
 
 @app.route('/cache/<path:filename>')
 def download_file(filename):
+    """Route for image in cache folder."""
     return send_from_directory(CACHE_FOLDER, filename, as_attachment=True)
 
 
-def render_index(form, recipe="", confidence=0., image_filename="placeholder"):
+def render_index(form: FlaskForm, recipe: str = "", confidence: float = 0., image_filename: str = "placeholder"):
+    """Wrapper for Flask templates.render_template method.
+        Args:
+            form: FlaskForm for file input.
+            recipe: text human-readable description of recipe.
+            confidence: calibrated confidence of classifier.
+            image_filename: image filename in cache folder.
+
+        Returns:
+            Flask templates.render_template method.
+    """
     conf_text = get_confidence_text(confidence)
     template = render_template('index.html',
                                form=form,

@@ -1,10 +1,12 @@
+"""Configuration file for Cocktailman application."""
+
 from os import getenv
 
 # General settings
 
 DEFAULT_DEBUG = 'False'
 
-DEBUG = getenv('DEBUG', DEFAULT_DEBUG) in {'True', '1'}
+DEBUG = getenv('DEBUG', DEFAULT_DEBUG) in {"True", "1", 'true', 'TRUE'}
 
 # Files
 
@@ -22,11 +24,11 @@ JPEG_QUALITY = 80
 
 # Network
 
-DEFAULT_DOCKER_HOST = "0.0.0.0"
+DEFAULT_DOCKER_HOST = "127.0.0.1"
 
 DOCKER_HOST = getenv('HOST', DEFAULT_DOCKER_HOST)
 
-DEFAULT_DOCKER_PORT = '5000'
+DEFAULT_DOCKER_PORT = 8000
 
 DOCKER_PORT = int(getenv('PORT', DEFAULT_DOCKER_PORT))
 

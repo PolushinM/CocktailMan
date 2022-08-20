@@ -1,14 +1,16 @@
+"""Provides main logic of backend application."""
+
 import os
 import ssl
 
 import urllib.request
-from typing import Union
+from typing import Union, Any
 
 import numpy as np
 from werkzeug.utils import secure_filename
+from werkzeug.datastructures import FileStorage
 
 from logger import logger
-
 
 from config import (CACHE_FOLDER, DEBUG, CLASSIFIER_CONF_THRESHOLD, MAX_IMAGE_FILE_SIZE,
                     CLASSIFIER_CONFIG_PATH, INGREDIENTS_CONFIG_PATH, CLASSIFIER_MODEL_PATH,
@@ -17,9 +19,8 @@ from config import (CACHE_FOLDER, DEBUG, CLASSIFIER_CONF_THRESHOLD, MAX_IMAGE_FI
                     BLUR_MODEL_PATH, VISUAL_BLUR_BBOX_EXPANSION, DRAW_BBOX, BBOX_LINE_THICKNESS,
                     BBOX_LINE_COLOR, GENERATOR_MODEL_PATH, GENERATOR_CONFIG_PATH, JPEG_QUALITY)
 
-from utils import get_random_filename, clear_cache
+from utils import get_random_filename, clear_cache, calibrate_confidence
 from models.models import ImageProcessor
-
 
 files_to_delete = []
 
@@ -37,7 +38,7 @@ image_processor = ImageProcessor(max_moderated_size=MAX_IMAGE_MODERATED_SIZE,
                                  cache_folder=CACHE_FOLDER,
                                  visual_blur_power=VISUAL_BLUR_POWER,
                                  visual_blur_bbox_expansion=VISUAL_BLUR_BBOX_EXPANSION,
-                                 draw_bbox=(DRAW_BBOX == 'True' or (DRAW_BBOX == 'Debug' and DEBUG)),
+                                 draw_bbox=DRAW_BBOX,
                                  bbox_line_thickness=BBOX_LINE_THICKNESS,
                                  bbox_line_color=BBOX_LINE_COLOR,
                                  debug=DEBUG)
@@ -49,6 +50,13 @@ ssl._create_default_https_context = ssl._create_unverified_context
 
 
 def generate_recipe(ingredients: list[str]) -> str:
+    """Generate human-readable text of recipe.
+        Args:
+            ingredients: list of ingredients in the accusative.
+
+        Returns:
+            String with text description of recipe.
+    """
     recipe = "Не могу найти напиток на изображении."
     if len(ingredients) > 0:
         if len(ingredients) > 1:
@@ -59,7 +67,16 @@ def generate_recipe(ingredients: list[str]) -> str:
     return recipe
 
 
-def generate_image(latent: Union[np.ndarray, None], ingr_list) -> str:
+def generate_image(latent: Union[np.ndarray, None], ingr_list: list[int]) -> str:
+    """Generate image from latent vector and list of ingredients indexes.
+        Args:
+            latent: latent vector for generator, default: None
+                    (None = generate from random multivariate normal distribution vector, E=1, D=1).
+            ingr_list: list of ingredients indexes.
+
+        Returns:
+            Path to stored generated image file.
+    """
     clear_cache(files_to_delete)
     filename = secure_filename(get_random_filename())
     full_filename = os.path.join(CACHE_FOLDER, filename)
@@ -71,7 +88,12 @@ def generate_image(latent: Union[np.ndarray, None], ingr_list) -> str:
     return full_filename
 
 
-def predict(src, src_type: str) -> tuple[str, float, tuple[float, float, float, float], str]:
+def predict(src: Union[FileStorage, str], src_type: str) -> tuple[str, float, str]:
+    """Predict human-readable recipe and confidence.
+        Args:
+            src: source for image downloading.
+            src_type: "file" for flask FileStorage or "url" for download from url.
+    """
     clear_cache(files_to_delete)
     filename = secure_filename(get_random_filename())
     full_filename = os.path.join(CACHE_FOLDER, filename)
@@ -88,8 +110,17 @@ def predict(src, src_type: str) -> tuple[str, float, tuple[float, float, float, 
     if src_type == "file":
         src.save(full_filename)
 
-    ingredients, confidence, b_box = image_processor.predict_blur_save(path=full_filename,
-                                                                       threshold=CLASSIFIER_CONF_THRESHOLD)
+    ingredients, confidence = image_processor.predict_blur_save(path=full_filename,
+                                                                threshold=CLASSIFIER_CONF_THRESHOLD)
     files_to_delete.append(full_filename)
     logger.debug(f"Main: predict ingredients. src_type = {src_type}")
-    return generate_recipe(ingredients), confidence, b_box, filename
+    return generate_recipe(ingredients), confidence, filename
+
+
+def get_confidence_text(confidence: float) -> str:
+    confidence = calibrate_confidence(confidence)
+    if confidence > 0.005:
+        conf_text = f"Я уверен на {round(confidence * 100)}%!"
+    else:
+        conf_text = ""
+    return conf_text

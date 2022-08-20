@@ -1,3 +1,5 @@
+"""Entrypoint for wsgi server in Docker container."""
+
 from views import app
 from config import DOCKER_PORT, DEBUG, DOCKER_HOST
 

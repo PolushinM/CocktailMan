@@ -12,10 +12,9 @@ RUN addgroup --gid 1001 --system app && \
 WORKDIR /home/app
 ENV PATH="/home/app/.local/bin:$PATH"
 COPY --from=builder /app/wheels /wheels
-COPY --from=builder /app/requirements.txt .
 RUN pip install --upgrade pip
 COPY . /home/app
 RUN chown -R app: /home/app
 USER app
 RUN pip install --no-cache /wheels/*
-CMD ["python", "init_docker.py"]
+CMD ["gunicorn", "init_docker:app"]

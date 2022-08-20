@@ -1,3 +1,5 @@
+"""Forms for web page."""
+
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileSize
 from wtforms import StringField
@@ -8,11 +10,10 @@ from config import MAX_IMAGE_FILE_SIZE
 
 
 class ButtonWidget:
-    """
-    Renders a multi-line text area.
+    """Renders a multi-line text area.
     `rows` and `cols` ought to be passed as keyword args when rendering.
-    https://gist.github.com/doobeh/239b1e4586c7425e5114
-    """
+    https://gist.github.com/doobeh/239b1e4586c7425e5114 """
+
     input_type = 'submit'
 
     html_params = staticmethod(html_params)
@@ -31,9 +32,11 @@ class ButtonWidget:
 
 
 class ButtonField(StringField):
+    """Custom button field for form."""
     widget = ButtonWidget()
 
 
 class UploadForm(FlaskForm):
+    """File upload form for main page."""
     input_file = FileField('', [FileSize(MAX_IMAGE_FILE_SIZE)])
     button = ButtonField()

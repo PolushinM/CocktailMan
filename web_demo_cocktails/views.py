@@ -2,12 +2,15 @@
 
 import os
 import json
-from flask import render_template, request, send_from_directory, flash
+import re
 
+import numpy as np
+from PIL import ImageColor
+from flask import render_template, request, send_from_directory, flash
 from forms import UploadForm
 from flask_wtf import FlaskForm
 
-from main import predict, INGREDIENTS_TEXT, generate_image, get_confidence_text
+from main import predict, INGREDIENTS_TEXT, LATENT_SIZE, generate_image, get_confidence_text
 from utils import uri_validator
 from config import CACHE_FOLDER
 from logger import logger
@@ -87,12 +90,27 @@ def generative_model():
         logger.debug(f"Generative_model GET request received. INGREDIENTS_TEXT={INGREDIENTS_TEXT}")
         return render_template('generative_model.html',
                                ingr_list=INGREDIENTS_TEXT,
-                               image_filename='')
+                               image_filename='',
+                               latent_size=LATENT_SIZE)
 
     if request.method == "POST":
         logger.debug("Generative_model POST request received.")
-        ingr_list = [int(item) for item in request.form]
-        image_path = generate_image(latent=None, ingr_list=ingr_list)
+        form_list = [(item, request.form[item]) for item in request.form]
+        ingr_list = list()
+        ranges = [0] * LATENT_SIZE
+        logger.debug(request.form)
+        background = [0, 0, 0]
+
+        for key, value in form_list:
+            range_match = re.match(r'Range_(\d+)', key)
+            ingr_match = re.match(r'Ingr_(\d+)', key)
+            if ingr_match and value == "on":
+                ingr_list.append(int(ingr_match.groups(0)[0]))
+            if range_match:
+                ranges[int(range_match.groups(0)[0])-1] = int(value) / 50 - 1
+            if key == "Color":
+                background = ImageColor.getcolor(value, "RGB")
+        image_path = generate_image(latent=np.array(ranges), background=np.array(background), ingr_list=ingr_list)
         return json.dumps({'image_path': image_path})
 
 

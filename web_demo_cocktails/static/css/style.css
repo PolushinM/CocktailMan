@@ -46,6 +46,10 @@ body {
   overflow: hidden;
 }
 
+.options_div {
+  margin-top: 20px;
+}
+
 #browsebutton {
   --bs-btn-bg: var(--bs-gray-100);
   --bs-btn-color: var(--bs-gray-800);

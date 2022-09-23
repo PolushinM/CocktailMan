@@ -146,9 +146,9 @@ class ImageProcessor:
 
         if b_box[2] * b_box[3] > 0.01:
             blurred_image = self.blur_model.blur_image(image=np.asarray(image),
-                                                      blur_bbox=b_box,
-                                                      power=self.visual_blur_power,
-                                                      expansion=self.visual_blur_bbox_expansion)
+                                                       blur_bbox=b_box,
+                                                       power=self.visual_blur_power,
+                                                       expansion=self.visual_blur_bbox_expansion)
             result_image = Image.fromarray(np.moveaxis(blurred_image, 0, 2).astype('uint8'), mode="RGB")
 
             if (self.draw_bbox == 'Debug' and self.debug) or (self.draw_bbox == "True"):
@@ -212,18 +212,19 @@ class ImageProcessor:
 
         return ingredients, confidence, b_box
 
-    def generate_to_file(self, latent: Union[np.ndarray, None], condition: np.ndarray, path: str) -> None:
+    def generate_to_file(self, latent: Union[np.ndarray, None], background: np.ndarray, condition: np.ndarray, path: str) -> None:
         """Generate image of cocktail and save to file.
 
            Args:
                latent: latent vector for generator, default: None
                    (None = generate from random multivariate normal distribution vector, E=1, D=1).
+               background: background RGB color vector for generator.
                condition: recipe vector, contains ingredients for cocktail,
                    1 - ingredient present, 0 - ingredient missing. Length must match
                    number of ingredients in config.
                path: path for saving resulting image.
         """
-        image_array = self.generator.generate_image(latent, condition) * 255
+        image_array = self.generator.generate_image(latent, background, condition) * 255
         self.__save_image(image_array, path)
 
     def __open_image(self, path: str) -> Union[Image.Image, None]:
@@ -535,7 +536,7 @@ class Detector:
                 image: image array of shape (width, height, 3).
 
             Returns:
-                Tuple of coordinates: (x_min, y_min, x_max, y_max).
+                Tuple of relative coordinates: (x_min, y_min, x_max, y_max).
         """
         if image is None:
             return None
@@ -696,6 +697,7 @@ class Generator:
         self.image_size = model_config['IMAGE_SIZE']
         self.latent_size = model_config['LATENT_SIZE']
         self.contrast = model_config['CONTRAST']
+        self.soft_contrast = model_config['SOFTCONTRAST']
         self.std = model_config['LATENT_SAMPLE_STD']
         self.debug = debug
         # Loading the ONNX model
@@ -707,11 +709,12 @@ class Generator:
         del model_onnx
         del open_vino_core
 
-    def generate_image(self, latent: Union[np.ndarray, None], condition: np.ndarray) -> np.ndarray:
+    def generate_image(self, latent: Union[np.ndarray, None], background: np.ndarray, condition: np.ndarray) -> np.ndarray:
         """Generate image from latent vector and condition (recipe) vector.
             Args:
                 latent: latent vector for generator, default: None
                     (None = generate from random multivariate normal distribution vector, E=1, D=1).
+                background: background RGB color vector for generator.
                 condition: recipe vector, contains ingredients for cocktail,
                     1 - ingredient present, 0 - ingredient missing. Length must match
                     number of ingredients in config.
@@ -720,7 +723,17 @@ class Generator:
                 Image array of shape (3, width, height).
         """
         if latent is None:
-            latent = np.random.normal(0, self.std, self.latent_size)
-        inputs = np.concatenate((latent.astype('float32'), condition.astype('float32')), axis=0)[None, :]
-        output = self.infer_request.infer([inputs])[self.model_output][0] * self.contrast - (self.contrast - 1) * 0.5
-        return np.clip(output, a_max=1., a_min=0.)
+            latent = np.random.normal(0, 1, self.latent_size)
+        latent *= self.std
+        background = np.concatenate((background / 127.5 - 1, background / 127.5 - 1)).astype('float32')
+
+        inputs = np.concatenate((latent.astype('float32'),
+                                 condition.astype('float32'),
+                                 background), axis=0)[None, :]
+        output = self.infer_request.infer([inputs])[self.model_output][0]
+        return self.normalize(output)
+
+    def normalize(self, in_image: np.ndarray):
+        out_image = 1 / (1 + np.exp(-in_image * self.soft_contrast))
+        out_image = out_image * self.contrast - (self.contrast - 1) * 0.5
+        return np.clip(out_image, a_max=1., a_min=0.)

@@ -45,6 +45,8 @@ image_processor = ImageProcessor(max_moderated_size=MAX_IMAGE_MODERATED_SIZE,
 
 INGREDIENTS_TEXT = image_processor.ingredients_text
 
+LATENT_SIZE = image_processor.generator.latent_size
+
 # Allow using unverified SSL for image downloading
 ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -67,11 +69,12 @@ def generate_recipe(ingredients: list[str]) -> str:
     return recipe
 
 
-def generate_image(latent: Union[np.ndarray, None], ingr_list: list[int]) -> str:
+def generate_image(latent: Union[np.ndarray, None], background: np.ndarray, ingr_list: list[int]) -> str:
     """Generate image from latent vector and list of ingredients indexes.
         Args:
             latent: latent vector for generator, default: None
                     (None = generate from random multivariate normal distribution vector, E=1, D=1).
+            background: background RGB color vector for generator.
             ingr_list: list of ingredients indexes.
 
         Returns:
@@ -82,7 +85,7 @@ def generate_image(latent: Union[np.ndarray, None], ingr_list: list[int]) -> str
     full_filename = os.path.join(CACHE_FOLDER, filename)
     condition = np.zeros(len(INGREDIENTS_TEXT), dtype='float32')
     condition[ingr_list] = 1.
-    image_processor.generate_to_file(latent, condition, full_filename)
+    image_processor.generate_to_file(latent, background, condition, full_filename)
     files_to_delete.append(full_filename)
     logger.debug(f"Main: generate image. latent = {latent}, condition = {condition}, full_filename = {full_filename}")
     return full_filename

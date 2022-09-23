@@ -25,7 +25,7 @@
               <div class="col-sm">
                   {% for i in range(0, ingr_list|length, 2) %}
                       <div class="form-check form-switch">
-                          <input class="form-check-input small" type="checkbox" role="switch" name="{{ i }}">
+                          <input class="form-check-input small" type="checkbox" role="switch" name="Ingr_{{ i }}">
                           <label class="form-check-label small" for="ingredients_form" id="ingr_switch_{{ i }}">{{ ingr_list[i] }}</label>
                       </div>
                   {% endfor %}
@@ -34,13 +34,27 @@
               <div class="col-sm">
                   {% for i in range(1, ingr_list|length, 2) %}
                       <div class="form-check form-switch">
-                          <input class="form-check-input small" type="checkbox" role="switch" name="{{ i }}">
+                          <input class="form-check-input small" type="checkbox" role="switch" name="Ingr_{{ i }}">
                           <label class="form-check-label small" for="ingredients_form" id="ingr_switch_{{ i }}">{{ ingr_list[i] }}</label>
                       </div>
                   {% endfor %}
               </div>
           </div>
       {%- endif %}
+
+        <div class="options_div row text-center">
+            <div class="col">
+                <p>Настрой свой коктейль:</p>
+                {% for i in range(latent_size) %}
+                    <label for="ingredients_form" class="form-label"></label><input type="range" class="form-range" name="Range_{{ i }}">
+                {% endfor %}
+            </div>
+            <div class="col-sm-2">
+                <label for="ingredients_form" class="form-label">Фон:</label>
+                <input type="color" class="form-control form-control-color" name="Color" value="#000000" title="Choose your color">
+            </div>
+        </div>
+
         <div class="text-center">
             <button class="btn btn-primary" type="button" onclick=generate_image() id="draw_button">
                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" hidden></span>

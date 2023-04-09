@@ -107,7 +107,7 @@ def generative_model():
             if ingr_match and value == "on":
                 ingr_list.append(int(ingr_match.groups(0)[0]))
             if range_match:
-                ranges[int(range_match.groups(0)[0])-1] = int(value) / 50 - 1
+                ranges[int(range_match.groups(0)[0]) - 1] = int(value) / 50 - 1
             if key == "Color":
                 background = ImageColor.getcolor(value, "RGB")
         image_path = generate_image(latent=np.array(ranges), background=np.array(background), ingr_list=ingr_list)

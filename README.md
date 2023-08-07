@@ -4,7 +4,7 @@
 [![Pylint](https://github.com/PolushinM/CocktailMan/actions/workflows/pylint.yml/badge.svg)](https://github.com/PolushinM/CocktailMan/actions/workflows/pylint.yml)
 [![Docker Image CI](https://github.com/PolushinM/CocktailMan/actions/workflows/docker-image.yml/badge.svg)](https://github.com/PolushinM/CocktailMan/actions/workflows/docker-image.yml)
 
-[Интернет-сайт](http://cocktailman.ml), на котором работают три обученные мной нейросетевые модели:
+[Интернет-сайт](http://185.117.72.245/), на котором работают три обученные мной нейросетевые модели:
 1. Классификатор, который по фото коктейля подсказывает ингредиенты, из которых его можно приготовить. (Уже работает)
 2. Детектор коктейля, который находит коктейль на фото и позволяет сделать красивое размытие вокруг коктейля на фото, а так же облегчает работу первой модели и готовит данные для третьей модели.
 3. Генератор text2image, который принимает текст рецепта и рисует изображение коктейля. (В разработке)

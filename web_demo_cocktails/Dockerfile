@@ -16,5 +16,5 @@ RUN pip install --upgrade pip
 COPY . /home/app
 RUN chown -R app: /home/app
 USER app
-RUN pip install --no-cache /wheels/*
+RUN pip install --user --no-cache /wheels/*
 CMD ["gunicorn", "init_docker:app"]

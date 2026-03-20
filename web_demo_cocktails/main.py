@@ -1,8 +1,6 @@
 """Provides main logic of backend application."""
 
 import os
-import ssl
-
 import urllib.request
 from typing import Union, Any
 
@@ -46,9 +44,6 @@ image_processor = ImageProcessor(max_moderated_size=MAX_IMAGE_MODERATED_SIZE,
 INGREDIENTS_TEXT = image_processor.ingredients_text
 
 LATENT_SIZE = image_processor.generator.latent_size
-
-# Allow using unverified SSL for image downloading
-ssl._create_default_https_context = ssl._create_unverified_context
 
 
 def generate_recipe(ingredients: list[str]) -> str:
@@ -103,13 +98,11 @@ def predict(src: Union[FileStorage, str], src_type: str) -> tuple[str, float, st
 
     if src_type == "url":
         req = urllib.request.Request(src, data=None, headers=REQUEST_HEADERS)
-        file = open(full_filename, "wb")
-        try:
-            file.write(urllib.request.urlopen(req).read(MAX_IMAGE_FILE_SIZE))
-        except Exception as e_urllib:
-            logger.error(f"Main: urllib exception: {e_urllib}")
-        finally:
-            file.close()
+        with open(full_filename, "wb") as file:
+            try:
+                file.write(urllib.request.urlopen(req, timeout=10).read(MAX_IMAGE_FILE_SIZE))
+            except Exception as e_urllib:
+                logger.error(f"Main: urllib exception: {e_urllib}")
     if src_type == "file":
         src.save(full_filename)
 

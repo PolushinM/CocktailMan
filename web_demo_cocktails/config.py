@@ -48,9 +48,12 @@ REQUEST_HEADERS = {
 
 # Security
 
-DEFAULT_SECRET_KEY = "12345"
-
-SECRET_KEY = getenv('SECRET_KEY', DEFAULT_SECRET_KEY)
+SECRET_KEY = getenv('SECRET_KEY')
+if not SECRET_KEY:
+    raise RuntimeError(
+        "SECRET_KEY environment variable is not set. "
+        "Generate one with: python -c \"import secrets; print(secrets.token_hex(32))\""
+    )
 
 # Models
 

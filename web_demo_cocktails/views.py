@@ -18,6 +18,10 @@ import app
 
 app = app.get_app()
 
+_CACHE_FILENAME_RE = re.compile(r'^[A-Za-z0-9]{10}\.jpg$')
+
+_HEX_COLOR_RE = re.compile(r'^#[0-9A-Fa-f]{6}$')
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -41,10 +45,7 @@ def index():
             request.form['image_url']) > 0
         url_exist = 'image_url' in request.form and uri_validator(request.form['image_url'])
 
-        logger.debug(f"input_file = {input_file}, "
-                     f"image_url = {image_url}, "
-                     f"file_exist = {file_exist}, "
-                     f"url_exist = {url_exist}.")
+        logger.debug(f"file_exist = {file_exist}, url_exist = {url_exist}.")
 
         if not file_exist and not url_exist:
             logger.info("Not file_exist and not url_exist.")
@@ -98,18 +99,25 @@ def generative_model():
         form_list = [(item, request.form[item]) for item in request.form]
         ingr_list = list()
         ranges = [0] * LATENT_SIZE
-        logger.debug(request.form)
         background = [0, 0, 0]
 
         for key, value in form_list:
             range_match = re.match(r'Range_(\d+)', key)
             ingr_match = re.match(r'Ingr_(\d+)', key)
             if ingr_match and value == "on":
-                ingr_list.append(int(ingr_match.groups(0)[0]))
+                idx = int(ingr_match.groups(0)[0])
+                if 0 <= idx < len(INGREDIENTS_TEXT):
+                    ingr_list.append(idx)
             if range_match:
-                ranges[int(range_match.groups(0)[0]) - 1] = int(value) / 50 - 1
+                idx = int(range_match.groups(0)[0]) - 1
+                if 0 <= idx < LATENT_SIZE:
+                    ranges[idx] = int(value) / 50 - 1
             if key == "Color":
-                background = ImageColor.getcolor(value, "RGB")
+                if _HEX_COLOR_RE.match(value):
+                    background = ImageColor.getcolor(value, "RGB")
+                else:
+                    logger.info(f"generative_model: invalid Color value rejected: {value!r}")
+
         image_path = generate_image(latent=np.array(ranges), background=np.array(background), ingr_list=ingr_list)
         return json.dumps({'image_path': image_path})
 
@@ -117,6 +125,9 @@ def generative_model():
 @app.route('/cache/<path:filename>')
 def download_file(filename):
     """Route for image in cache folder."""
+    if not _CACHE_FILENAME_RE.match(filename):
+        logger.info(f"download_file: rejected invalid filename: {filename!r}")
+        return ("Not Found", 404)
     return send_from_directory(CACHE_FOLDER, filename, as_attachment=True)
 
 

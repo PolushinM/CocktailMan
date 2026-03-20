@@ -1,7 +1,9 @@
 """Auxiliary utils."""
 
+import ipaddress
 import os
-import random
+import secrets
+import socket
 import string
 from math import pi, sin
 from urllib.parse import urlparse
@@ -11,16 +13,19 @@ from logger import logger
 
 
 def get_random_filename():
-    """Generate random filename *.jpg."""
+    """Generate cryptographically secure random filename *.jpg."""
     letters = string.ascii_letters + string.digits
-    name = "".join(random.choice(letters) for i in range(RANDOM_FILENAME_LENGTH))
+    name = "".join(secrets.choice(letters) for _ in range(RANDOM_FILENAME_LENGTH))
     return "".join([name, ".jpg"])
 
 
 def clear_cache(files_to_delete: list):
     """Delete unnecessary image files from cache."""
     for file in files_to_delete:
-        os.popen(f"rm {file}")
+        try:
+            os.remove(file)
+        except OSError as e:
+            logger.info(f"clear_cache: could not delete {file}: {e}")
     files_to_delete.clear()
 
 
@@ -30,17 +35,32 @@ def calibrate_confidence(confidence: float) -> float:
 
 
 def uri_validator(uri: str) -> bool:
-    """Validate URI string.
+    """Validate URI string. Only http/https schemes are allowed.
+    Rejects requests to private, loopback, and link-local addresses (SSRF protection).
+
         Args:
             uri: uri string for validating.
 
         Returns:
-            True if "uri" is valid uri, else - False.
+            True if "uri" is a valid public http/https URL, else - False.
     """
     try:
         assert len(uri) > 0
         result = urlparse(uri)
-        return all([result.scheme, result.netloc])
+        if result.scheme not in ("http", "https"):
+            return False
+        if not result.netloc:
+            return False
+        hostname = result.hostname
+        if not hostname:
+            return False
+        resolved = socket.getaddrinfo(hostname, None)
+        for _, _, _, _, sockaddr in resolved:
+            addr = ipaddress.ip_address(sockaddr[0])
+            if addr.is_private or addr.is_loopback or addr.is_link_local or addr.is_reserved:
+                logger.info(f"uri_validator: blocked private/reserved address {addr} for {uri}")
+                return False
+        return True
     except Exception as exception:
         logger.info(f"uri_validator: {str(exception)}")
         return False

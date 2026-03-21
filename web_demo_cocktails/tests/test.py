@@ -1,37 +1,32 @@
-import unittest
-import os
-import sys
-from pathlib import Path
+"""
+Test suite entry point — collects all test modules.
+Run via: pytest ./web_demo_cocktails/tests/
+"""
 
-from flask import url_for
-
-sys.path.append(str(Path(__file__).parent.parent))
-os.chdir(str(Path(__file__).parent.parent))
-from views import app
-
-
-TEST_TEXT = ["CocktailMan",
-             "Выбери файл с изображением или вставь ссылку:",
-             "Доступные ингредиенты",
-             "github.com/PolushinM/CocktailMan"]
-
-
-class HomePageDisplayTestCase(unittest.TestCase):
-    def setUp(self):
-        self.app = app.test_client()
-        self.ctx = app.test_request_context()
-        self.ctx.push()
-
-    def tearDown(self):
-        self.ctx.pop()
-
-    def test_main_text_displayed(self):
-        self.assertGreater(2.0, 1.0)
-        response = self.app.get(url_for('index'))
-        response_data = response.data.decode('utf-8')
-        for string in TEST_TEXT:
-            assert string in response_data
-
-
-if __name__ == '__main__':
-    unittest.main()
+# ruff: noqa: F401  (imports used by pytest via collection)
+from test_utils import (
+    TestGetRandomFilename,
+    TestClearCache,
+    TestCalibrateConfidence,
+    TestUriValidator,
+    TestClip,
+)
+from test_main import (
+    TestGenerateRecipe,
+    TestGetConfidenceText,
+    TestPredict,
+    TestGenerateImage,
+)
+from test_views import (
+    TestIndexGet,
+    TestIndexPostEmpty,
+    TestIndexPostUrl,
+    TestIndexPostFile,
+    TestGenerativeModelGet,
+    TestGenerativeModelPost,
+    TestDownloadFile,
+)
+# Note: test_no_input_shows_flash → test_no_input_calls_flash
+#       test_recipe_appears_in_response → test_recipe_call_returns_200
+#       test_predict_exception_shows_flash → test_predict_exception_calls_flash
+#       test_file_predict_exception_shows_flash → test_file_predict_exception_calls_flash

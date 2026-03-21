@@ -5,9 +5,9 @@ name: Test
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "develop", "feature/*", "security/*" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "develop" ]
 
 permissions:
   contents: read

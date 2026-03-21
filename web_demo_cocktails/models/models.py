@@ -15,7 +15,7 @@ import json
 from typing import Union
 
 import numpy as np
-from openvino.runtime import Core
+from openvino import Core
 from PIL import Image, ImageDraw
 from utils import clip, log_error, log_debug
 
